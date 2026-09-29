@@ -224,11 +224,11 @@ Keyboard: <kbd>Ctrl</kbd> + <kbd>C</kbd>. Super<sup>script</sup> and sub<sub>scr
 
 ## Raw HTML: the malicious section
 
-Everything below must render inert. No alerts, no requests, no forms, nothing covering the page.
+Everything below must render inert: no alerts, no requests, no forms, nothing covering the page. Each line names the attack it carries; only inert leftovers (plain text, alt text, harmless links) should remain.
 
 <script>document.title = "pwned"; alert("script tag");</script>
 
-<img src="x" onerror="alert('onerror')">
+<img src="x" onerror="alert('onerror')" alt="image with onerror handler">
 
 <a href="javascript:alert('javascript: url')">javascript: link</a>
 
@@ -246,6 +246,7 @@ Everything below must render inert. No alerts, no requests, no forms, nothing co
 
 <link rel="stylesheet" href="https://example.com/evil.css">
 <style>body { display: none !important; }</style>
+<p>The style block above tries to hide the whole page.</p>
 
 <meta http-equiv="refresh" content="0;url=https://example.com">
 <base href="https://example.com/">
@@ -269,7 +270,7 @@ Everything below must render inert. No alerts, no requests, no forms, nothing co
 
 <!-- an HTML comment -->
 
-End of the malicious section. If you can read this, the page was not hidden.
+End of the malicious section. This sentence is visible, so the "hide the page" style above was stripped.
 
 ## The end
 

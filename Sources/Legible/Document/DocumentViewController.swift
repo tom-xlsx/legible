@@ -1,5 +1,6 @@
 import AppKit
 import SwiftUI
+import WebKit
 
 /// Hosts the three panes (table of contents, editor, preview) in a split view
 /// controller, plus the floating find bar and notice bar.
@@ -257,7 +258,7 @@ final class DocumentViewController: NSViewController {
     func hideEditor() {
         guard isEditorVisible else { return }
         UserDefaults.standard.set(Double(editor.frame.width), forKey: Self.editorWidthKey)
-        editorItem.isCollapsed = true
+        collapse(editorItem)
         view.window?.makeFirstResponder(preview.webView)
         view.window?.toolbar?.validateVisibleItems()
         preview.mothEvent("editor-close")
@@ -276,12 +277,10 @@ final class DocumentViewController: NSViewController {
     }
 
     /// Expands a pane with a single layout pass: the pane is given its width before it
-    /// uncollapses, so the preview resizes once instead of twice (which showed as a flicker).
+    /// uncollapses, so the preview resizes once instead of twice.
     private func expand(_ item: NSSplitViewItem, view pane: NSView, dividerIndex: Int, position: CGFloat, width: CGFloat) {
         pane.frame.size.width = width
-        NSAnimationContext.runAnimationGroup { context in
-            context.duration = 0
-            context.allowsImplicitAnimation = false
+        withPreviewFrozen { [self] in
             item.isCollapsed = false
             split.splitView.layoutSubtreeIfNeeded()
             if abs(pane.frame.width - width) > 1 {
@@ -290,10 +289,50 @@ final class DocumentViewController: NSViewController {
         }
     }
 
+    private func collapse(_ item: NSSplitViewItem) {
+        withPreviewFrozen { item.isCollapsed = true }
+    }
+
+    /// WebKit repaints the old layout at a new width before it re-wraps, which shows as a
+    /// sideways stutter. Cover the preview with a snapshot of itself (kept centred on the
+    /// new frame) while the panes change, and remove it once the page has painted again.
+    private func withPreviewFrozen(_ change: @escaping () -> Void) {
+        let webView = preview.webView
+        guard hasRendered, webView.bounds.width > 0 else { change(); return }
+        let config = WKSnapshotConfiguration()
+        config.rect = webView.bounds
+        config.afterScreenUpdates = false
+        let oldWidth = webView.bounds.width
+        webView.takeSnapshot(with: config) { [weak self] image, _ in
+            guard let self, let image else { change(); return }
+            let overlay = NSImageView(image: image)
+            overlay.imageScaling = .scaleNone
+            overlay.imageAlignment = .alignTop
+            overlay.wantsLayer = true
+            overlay.layer?.backgroundColor = ThemeManager.shared.effective.backgroundColor.cgColor
+            preview.clipsToBounds = true
+            preview.addSubview(overlay, positioned: .above, relativeTo: webView)
+            NSAnimationContext.runAnimationGroup { context in
+                context.duration = 0
+                context.allowsImplicitAnimation = false
+                change()
+                self.view.layoutSubtreeIfNeeded()
+            }
+            let newWidth = preview.bounds.width
+            overlay.frame = NSRect(x: ((newWidth - oldWidth) / 2).rounded(), y: preview.bounds.height - image.size.height,
+                                   width: oldWidth, height: image.size.height)
+            var removed = false
+            let remove = { if !removed { removed = true; overlay.removeFromSuperview() } }
+            webView.callAsyncJavaScript("await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))",
+                                        in: nil, in: .page) { _ in remove() }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { remove() }
+        }
+    }
+
     func hideTOC() {
         guard isTOCVisible else { return }
         UserDefaults.standard.set(Double(tocView.frame.width), forKey: Self.tocWidthKey)
-        tocItem.isCollapsed = true
+        collapse(tocItem)
         view.window?.toolbar?.validateVisibleItems()
     }
 

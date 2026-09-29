@@ -83,6 +83,9 @@
     ALLOW_DATA_ATTR: true,
     ALLOW_ARIA_ATTR: false,
     KEEP_CONTENT: true,
+    // Dropped elements normally leave their text behind; these should vanish wholesale.
+    FORBID_CONTENTS: ['script', 'style', 'iframe', 'object', 'embed', 'form', 'button', 'textarea', 'select',
+      'svg', 'math', 'video', 'audio', 'template', 'noscript'],
   };
 
   // The only <input> allowed is the disabled checkbox task lists produce.
@@ -284,6 +287,7 @@
     assert(marker && marker.offsetParent !== null, 'end-of-section marker is not visible');
     assert(getComputedStyle(document.body).display !== 'none', 'body was hidden');
     assert(root.querySelectorAll('input[type=checkbox]:not([disabled])').length === 0, 'an enabled checkbox survived');
+    assert(!root.textContent.includes('Submit'), 'a stripped form left its button text behind');
 
     const local = [...root.querySelectorAll('img[src^="legible-doc:"]')].filter((i) => i.getAttribute('src').endsWith('gradient.png'));
     assert(local.length > 0 && local.every((i) => i.naturalWidth > 0), 'relative image gradient.png did not load');
