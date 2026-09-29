@@ -1,0 +1,41 @@
+#!/bin/bash
+# legible — open Markdown files in Legible from the terminal.
+#
+#   legible README.md [more.md ...]   open files
+#   legible -                         read Markdown from stdin
+#   legible --version                 print the installed app's version
+#   legible --help
+#
+# Set LEGIBLE_APP to point at a different Legible.app.
+set -euo pipefail
+
+APP="${LEGIBLE_APP:-$HOME/Applications/Legible.app}"
+[ -d "$APP" ] || APP="/Applications/Legible.app"
+[ -d "$APP" ] || { echo "legible: Legible.app not found (run 'make install' or set LEGIBLE_APP)" >&2; exit 1; }
+
+case "${1:-}" in
+  --version|-v)
+    /usr/libexec/PlistBuddy -c 'Print :LegibleVersionDescription' "$APP/Contents/Info.plist"
+    exit 0 ;;
+  --help|-h)
+    sed -n '2,10p' "$0" | sed 's/^# \{0,1\}//'
+    exit 0 ;;
+esac
+
+files=()
+for arg in "$@"; do
+  if [ "$arg" = "-" ]; then
+    tmp="$(mktemp -t legible-stdin).md"
+    cat > "$tmp"
+    files+=("$tmp")
+  else
+    [ -e "$arg" ] || { echo "legible: no such file: $arg" >&2; exit 1; }
+    files+=("$arg")
+  fi
+done
+
+if [ "${#files[@]}" -eq 0 ]; then
+  open -a "$APP"
+else
+  open -a "$APP" -- "${files[@]}"
+fi

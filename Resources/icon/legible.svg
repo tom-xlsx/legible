@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Legible app icon: a hashbrown shaped like a "#" on a plate.
+     Replace this artwork freely; `make icon` regenerates the .icns.
+     Keep it 1024x1024 with the content inside the rounded square. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="cloth" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e9dfcc"/>
+      <stop offset="1" stop-color="#d6c8ad"/>
+    </linearGradient>
+    <radialGradient id="plate" cx="0.5" cy="0.42" r="0.6">
+      <stop offset="0" stop-color="#fbf8f2"/>
+      <stop offset="0.75" stop-color="#f1ebe0"/>
+      <stop offset="1" stop-color="#e2d9c9"/>
+    </radialGradient>
+    <linearGradient id="brown" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e2a441"/>
+      <stop offset="0.55" stop-color="#cf8a2a"/>
+      <stop offset="1" stop-color="#a86518"/>
+    </linearGradient>
+  </defs>
+
+  <!-- tablecloth background -->
+  <rect x="0" y="0" width="1024" height="1024" rx="224" fill="url(#cloth)"/>
+  <rect x="0" y="0" width="1024" height="1024" rx="224" fill="none" stroke="#c9b997" stroke-width="10"/>
+
+  <!-- plate shadow and plate -->
+  <ellipse cx="512" cy="566" rx="392" ry="384" fill="#b9a884" opacity="0.45"/>
+  <circle cx="512" cy="540" r="392" fill="url(#plate)" stroke="#cfc4b1" stroke-width="10"/>
+  <circle cx="512" cy="540" r="308" fill="none" stroke="#dcd2c0" stroke-width="7"/>
+
+  <!-- hashbrown "#" -->
+  <g transform="translate(512 540) rotate(-7) skewX(-12)">
+    <!-- bars -->
+    <g fill="url(#brown)" stroke="#8f5514" stroke-width="12" stroke-linejoin="round">
+      <rect x="-250" y="-138" width="500" height="92" rx="40"/>
+      <rect x="-250" y="46" width="500" height="92" rx="40"/>
+      <rect x="-142" y="-250" width="92" height="500" rx="40"/>
+      <rect x="50" y="-250" width="92" height="500" rx="40"/>
+    </g>
+    <!-- crispy bits -->
+    <g fill="#f0c063" opacity="0.85">
+      <ellipse cx="-190" cy="-102" rx="26" ry="12"/>
+      <ellipse cx="120" cy="-96" rx="22" ry="10"/>
+      <ellipse cx="-30" cy="84" rx="30" ry="12"/>
+      <ellipse cx="180" cy="90" rx="22" ry="10"/>
+      <ellipse cx="-100" cy="-190" rx="12" ry="24"/>
+      <ellipse cx="96" cy="170" rx="12" ry="24"/>
+    </g>
+    <g fill="#8a4f12" opacity="0.7">
+      <ellipse cx="-60" cy="-120" rx="14" ry="7"/>
+      <ellipse cx="200" cy="-110" rx="12" ry="6"/>
+      <ellipse cx="-210" cy="70" rx="14" ry="7"/>
+      <ellipse cx="60" cy="110" rx="12" ry="6"/>
+      <ellipse cx="-96" cy="200" rx="7" ry="14"/>
+      <ellipse cx="96" cy="-200" rx="7" ry="14"/>
+    </g>
+  </g>
+</svg>

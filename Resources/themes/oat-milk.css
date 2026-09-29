@@ -1,0 +1,59 @@
+/* @name Oat Milk
+   @appearance light
+   @description Soft off-white, neutral. The default light theme. */
+:root {
+  --bg: #f5f2eb;
+  --fg: #2c2a26;
+  --fg-muted: #66625a;
+  --link: #35619b;
+  --link-hover: #244a7c;
+  --heading: #1f1d1a;
+  --rule: #dcd6ca;
+
+  --quote-fg: #5a564f;
+  --quote-border: #cdc6b8;
+  --quote-bg: #efebe2;
+
+  --table-border: #dcd6ca;
+  --table-head-bg: #ebe7dd;
+  --table-stripe: #f0ede5;
+
+  --code-inline-fg: #4a463f;
+  --code-inline-bg: #e9e5db;
+
+  --code-fg: #2c2a26;
+  --code-bg: #ece8df;
+  --code-border: #dfd9cc;
+  --code-label: #7a756c;
+
+  --copy-fg: #5a564f;
+  --copy-bg: #f5f2eb;
+  --copy-border: #cdc6b8;
+  --copy-hover-bg: #e2ddd1;
+  --copy-hover-fg: #2c2a26;
+
+  --selection-bg: #d2deeb;
+  --selection-fg: #1f1d1a;
+
+  --font-body: -apple-system, system-ui, "Helvetica Neue", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+  --font-size: 16px;
+  --line-height: 1.6;
+  --measure: 76ch;
+
+  --hl-comment: #66615a;
+  --hl-keyword: #5b3fa8;
+  --hl-string: #7f520c;
+  --hl-number: #9a4a0a;
+  --hl-function: #2c5f99;
+  --hl-type: #186a72;
+  --hl-variable: #2c2a26;
+  --hl-attr: #186a72;
+  --hl-tag: #5b3fa8;
+  --hl-meta: #66615a;
+  --hl-punct: #5e5a53;
+  --hl-addition-bg: #d9e5f3;
+  --hl-deletion-bg: #f3e2cf;
+  --hl-keyword-weight: 600;
+  --hl-comment-style: italic;
+}

@@ -1,0 +1,59 @@
+/* @name Burnt Toast
+   @appearance dark
+   @description Charcoal, not black. The default dark theme. */
+:root {
+  --bg: #2b2926;
+  --fg: #dad5c9;
+  --fg-muted: #9d978c;
+  --link: #8db4dc;
+  --link-hover: #a9c8e8;
+  --heading: #ebe6da;
+  --rule: #46423c;
+
+  --quote-fg: #b8b2a6;
+  --quote-border: #5a554e;
+  --quote-bg: #302d29;
+
+  --table-border: #46423c;
+  --table-head-bg: #35322d;
+  --table-stripe: #2f2c28;
+
+  --code-inline-fg: #dfd9cc;
+  --code-inline-bg: #3a3631;
+
+  --code-fg: #dad5c9;
+  --code-bg: #211f1c;
+  --code-border: #3a3631;
+  --code-label: #9d978c;
+
+  --copy-fg: #c9c3b7;
+  --copy-bg: #35322d;
+  --copy-border: #55504a;
+  --copy-hover-bg: #46423c;
+  --copy-hover-fg: #ebe6da;
+
+  --selection-bg: #3d4a5e;
+  --selection-fg: #ebe6da;
+
+  --font-body: -apple-system, system-ui, "Helvetica Neue", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+  --font-size: 16px;
+  --line-height: 1.6;
+  --measure: 76ch;
+
+  --hl-comment: #8f897e;
+  --hl-keyword: #bda4ea;
+  --hl-string: #d8b46c;
+  --hl-number: #e39d62;
+  --hl-function: #82b4e6;
+  --hl-type: #72c4c8;
+  --hl-variable: #dad5c9;
+  --hl-attr: #72c4c8;
+  --hl-tag: #bda4ea;
+  --hl-meta: #9d978c;
+  --hl-punct: #a49e93;
+  --hl-addition-bg: #2c3b4f;
+  --hl-deletion-bg: #4b3524;
+  --hl-keyword-weight: 600;
+  --hl-comment-style: italic;
+}
