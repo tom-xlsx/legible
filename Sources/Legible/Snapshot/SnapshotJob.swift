@@ -18,10 +18,12 @@ struct LaunchOptions {
     var save = false
     var printDocuments = false
     var settingsPane: String?
+    var aboutBox = false
+    var dockIcon = false
     var editText: String?
     var delay: Double = 0.8
 
-    var isHeadless: Bool { snapshotInput != nil || selfTestInput != nil || settingsPane != nil }
+    var isHeadless: Bool { snapshotInput != nil || selfTestInput != nil || settingsPane != nil || aboutBox || dockIcon }
 
     init(arguments: [String]) {
         for argument in arguments {
@@ -30,6 +32,8 @@ struct LaunchOptions {
             if argument == "--toc" { showTOC = true; continue }
             if argument == "--save" { save = true; continue }
             if argument == "--print-documents" { printDocuments = true; continue }
+            if argument == "--about" { aboutBox = true; continue }
+            if argument == "--dock-icon" { dockIcon = true; continue }
             guard argument.hasPrefix("--"), let eq = argument.firstIndex(of: "=") else { continue }
             let key = argument[argument.index(argument.startIndex, offsetBy: 2)..<eq]
             let value = String(argument[argument.index(after: eq)...])
@@ -132,6 +136,9 @@ final class SnapshotJob {
                     controller.preview.evaluate("Legible.topLine()") { line in
                         let editorLine = controller.isEditorVisible ? ", editor top line \(controller.editor.topLine)" : ""
                         print("preview top line \(line ?? "?")\(editorLine); notice: \(controller.noticeBarForTesting.isHidden ? "hidden" : controller.noticeBarForTesting.message); subtitle: \"\(window.subtitle)\"; current heading: \(controller.toc.currentID ?? "none")")
+                        let viewMenu = NSApp.mainMenu?.item(withTitle: "View")?.submenu
+                        viewMenu?.delegate?.menuNeedsUpdate?(viewMenu!)
+                        print("garnish: held=\(Garnish.held) last view item=\"\(viewMenu?.items.last?.title ?? "")\" dock icon custom=\(NSApp.applicationIconImage != nil && Garnish.dockIcon)")
                         print("panes: toc hidden=\(controller.tocViewForTesting.isHidden) \(controller.tocViewForTesting.frame); editor hidden=\(controller.editor.isHidden) \(controller.editor.frame); preview \(controller.preview.frame)")
                         self.capture(controller.preview.webView, in: controller.view, overlays: overlays)
                     }
@@ -212,6 +219,47 @@ final class SettingsSnapshotJob {
             guard let png = rep.representation(using: .png, properties: [:]) else { exit(1) }
             do { try png.write(to: output) } catch { exit(1) }
             print("Wrote \(output.path) (\(rep.pixelsWide)×\(rep.pixelsHigh))")
+            exit(0)
+        }
+    }
+}
+
+
+/// `Legible --about --out=x.png` captures the About panel; `--dock-icon --theme=id --out=x.png` writes the themed Dock icon.
+final class GarnishSnapshotJob {
+    private let options: LaunchOptions
+    private let output: URL
+
+    init?(options: LaunchOptions) {
+        guard options.aboutBox || options.dockIcon, let output = options.output else { return nil }
+        self.options = options
+        self.output = URL(fileURLWithPath: output)
+    }
+
+    func run() {
+        if options.dockIcon {
+            let theme = options.theme.flatMap { ThemeManager.shared.theme($0) } ?? ThemeManager.shared.effective
+            guard let image = DockIcon.image(for: theme) else { FileHandle.standardError.write(Data("no icon\n".utf8)); exit(1) }
+            let rep = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: 256, pixelsHigh: 256, bitsPerSample: 8, samplesPerPixel: 4,
+                                       hasAlpha: true, isPlanar: false, colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0)!
+            NSGraphicsContext.saveGraphicsState()
+            NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: rep)
+            image.draw(in: NSRect(x: 0, y: 0, width: 256, height: 256))
+            NSGraphicsContext.restoreGraphicsState()
+            try? rep.representation(using: .png, properties: [:])?.write(to: output)
+            print("Wrote \(output.path) (dock icon, \(theme.id))")
+            exit(0)
+        }
+        (NSApp.delegate as? AppDelegate)?.showAbout(nil)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [self] in
+            guard let panel = NSApp.windows.first(where: { $0.isVisible && !($0 is DocumentWindow) && $0 !== SettingsWindowController.shared.window }),
+                  let view = panel.contentView, let rep = view.bitmapImageRepForCachingDisplay(in: view.bounds) else {
+                FileHandle.standardError.write(Data("about panel not found among: \(NSApp.windows.map { "\($0.className) visible=\($0.isVisible)" })\n".utf8))
+                exit(1)
+            }
+            view.cacheDisplay(in: view.bounds, to: rep)
+            try? rep.representation(using: .png, properties: [:])?.write(to: output)
+            print("Wrote \(output.path) (about)")
             exit(0)
         }
     }

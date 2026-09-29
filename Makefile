@@ -3,6 +3,8 @@ ICNS     := build/Legible.icns
 INSTALL  := $(HOME)/Applications/Legible.app
 BINDIR   := $(HOME)/.local/bin
 FIXTURE  := fixtures/kitchen-sink.md
+# Checks and snapshots run against a throwaway settings file, never yours.
+export LEGIBLE_SETTINGS := $(CURDIR)/build/check-settings.toml
 
 .PHONY: all build app icon install check test snapshots release clean
 
@@ -37,6 +39,7 @@ test:
 
 ## Everything that must pass before a commit: build, tests, theme checks, fixture render.
 check: app test
+	rm -f build/check-settings.toml
 	python3 scripts/check-themes.py Resources/themes
 	$(APP)/Contents/MacOS/Legible --selftest=$(FIXTURE)
 	$(APP)/Contents/MacOS/Legible --snapshot=$(FIXTURE) --out=build/check-oat-milk.png --theme=oat-milk

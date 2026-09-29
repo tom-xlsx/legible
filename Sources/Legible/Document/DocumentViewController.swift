@@ -166,6 +166,7 @@ final class DocumentViewController: NSViewController {
         if s.measure > 0 { css += " --measure: \(s.measure)ch;" }
         css += " }"
         preview.setOverrides(css: css)
+        preview.configure(garnish: Garnish.pageConfiguration)
         editor.apply(settings: s)
         view.window?.subtitle = s.showReadingTime && hasRendered ? ReadingTime.label(words: wordCount) : ""
 
@@ -372,6 +373,7 @@ enum ReadingTime {
     static func label(words: Int) -> String {
         guard words > 0 else { return "" }
         let m = minutes(words: words)
+        if Garnish.coffees { return Garnish.coffees(minutes: m) }
         return m <= 1 ? "1 min read" : "\(m) min read"
     }
 }

@@ -5,6 +5,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var snapshotJob: SnapshotJob?
     private var selfTestJob: SelfTestJob?
     private var settingsSnapshotJob: SettingsSnapshotJob?
+    private var garnishSnapshotJob: GarnishSnapshotJob?
     private var restoredSession = false
 
     func applicationWillFinishLaunching(_ notification: Notification) {
@@ -13,6 +14,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         SettingsStore.shared.start()
         SettingsApplier.shared.start()
         NSApp.mainMenu = MainMenu.build()
+        DockIconController.shared.start()
     }
 
     @objc func showSettings(_ sender: Any?) {
@@ -36,6 +38,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             job.run()
         } else if let job = SettingsSnapshotJob(options: launchOptions) {
             settingsSnapshotJob = job
+            job.run()
+        } else if let job = GarnishSnapshotJob(options: launchOptions) {
+            garnishSnapshotJob = job
             job.run()
         }
     }
@@ -80,6 +85,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.orderFrontStandardAboutPanel(options: [
             .applicationVersion: AppInfo.versionDescription,
             .version: "",
+            .credits: Garnish.aboutCredits(),
         ])
     }
 }

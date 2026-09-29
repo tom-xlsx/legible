@@ -71,6 +71,10 @@ final class PreviewView: NSView {
         call("Legible.setTheme(\(jsLiteral(css)))")
     }
 
+    func configure(garnish: [String: Any]) {
+        call("Legible.configure(\(jsLiteral(["garnish": garnish])))")
+    }
+
     /// CSS applied after the theme (font and measure settings).
     func setOverrides(css: String) {
         call("Legible.setOverrides(\(jsLiteral(css)))")

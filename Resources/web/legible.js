@@ -177,12 +177,15 @@
   }
 
   function wordCount() {
-    return root.innerText.split(/\s+/).filter(Boolean).length;
+    if (root.querySelector('.empty-state')) return 0;
+    const clone = root.cloneNode(true);
+    for (const el of clone.querySelectorAll('.ornament, .copy')) el.remove();
+    return clone.textContent.split(/\s+/).filter(Boolean).length;
   }
 
   // ---- Copy buttons ------------------------------------------------------
 
-  const state = { copyMessages: ['Copied.'] };
+  const state = { copyMessages: ['Copied.'], emptyStates: ['This file is empty.'], garnish: null };
 
   function addCopyButtons() {
     for (const block of root.querySelectorAll('.code-block[data-code]')) {
@@ -196,6 +199,7 @@
       button.setAttribute('aria-label', lang ? `Copy ${lang} code` : 'Copy code');
       button.addEventListener('click', () => {
         post({ type: 'copy', text: copyText(index) });
+        if (window.LegibleGarnish) window.LegibleGarnish.copied();
         const message = state.copyMessages[Math.floor(Math.random() * state.copyMessages.length)];
         button.textContent = message;
         button.classList.add('copied');
@@ -296,6 +300,10 @@
     assert(html && html.textContent.includes('<script>alert("this is text, not a script")</script>'), 'html code block did not show its source as text');
     assert(root.querySelector('.code-block[data-lang="mermaid"]'), 'mermaid fence is not a plain code block');
 
+    if (!state.garnish) {
+      assert(!document.getElementById('moth'), 'moth present while the garnish is held');
+      assert(!root.querySelector('.ornament'), 'ornament present while the garnish is held');
+    }
     const ids = [...root.querySelectorAll('h1, h2, h3, h4, h5, h6')].map((h) => h.id);
     assert(new Set(ids).size === ids.length, `duplicate heading ids: ${ids.join(', ')}`);
     assert(ids.includes('level-three') && ids.includes('level-three-1'), 'heading id de-duplication failed');
@@ -431,9 +439,16 @@
       }
 
       root.innerHTML = window.DOMPurify.sanitize(html, PURIFY_OPTIONS);
+      if (!root.textContent.trim() && !root.querySelector('img')) {
+        const empty = document.createElement('p');
+        empty.className = 'empty-state';
+        empty.textContent = state.emptyStates[Math.floor(Math.random() * state.emptyStates.length)];
+        root.appendChild(empty);
+      }
       const headings = assignHeadingIds();
       resolveRelativeUrls(docBase);
       addCopyButtons();
+      if (window.LegibleGarnish) window.LegibleGarnish.afterRender();
 
       if (anchor) restoreScroll(anchor);
       else if (!preserveScroll) programmaticScroll(() => window.scrollTo({ top: 0, behavior: 'instant' }));
@@ -460,9 +475,13 @@
     },
 
     configure(options) {
-      if (Array.isArray(options.copyMessages) && options.copyMessages.length) {
-        state.copyMessages = options.copyMessages;
-      }
+      const garnish = options.garnish || {};
+      state.copyMessages = Array.isArray(garnish.copyMessages) && garnish.copyMessages.length ? garnish.copyMessages : ['Copied.'];
+      state.emptyStates = Array.isArray(garnish.emptyStates) && garnish.emptyStates.length ? garnish.emptyStates : ['This file is empty.'];
+      const empty = root.querySelector('.empty-state');
+      if (empty) empty.textContent = state.emptyStates[0];
+      state.garnish = garnish.mascot || garnish.ornament ? garnish : null;
+      if (window.LegibleGarnish) window.LegibleGarnish.configure(garnish);
     },
 
     findStatus,

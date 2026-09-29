@@ -245,6 +245,55 @@ sup.footnote-ref a { text-decoration: none; padding: 0 0.1em; }
 .focus-mode .doc > .focused, .focus-mode .doc > .front-matter { opacity: 1; }
 .focus-mode .doc > *:hover { opacity: 1; }
 
+/* ---- Empty state ----------------------------------------------------- */
+
+.empty-state { color: var(--fg-muted); text-align: center; margin-top: 30vh; font-size: 0.95em; }
+
+/* ---- Garnish: ornament and moth --------------------------------------- */
+
+.ornament { text-align: center; margin: 3em 0 1em; color: var(--fg-muted); opacity: 0.7; }
+.ornament svg { fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+
+#moth {
+  position: fixed; right: 18px; bottom: 14px;
+  width: 84px; height: 84px;
+  pointer-events: none;
+  user-select: none;
+  z-index: 10;
+  transform: translateX(var(--moth-drift, 0px));
+  transition: transform 1.4s ease, opacity 300ms ease;
+  opacity: 0.92;
+}
+#moth.moth-tucked { opacity: 0; }
+#moth svg { display: block; overflow: visible; }
+#moth path, #moth circle, #moth ellipse, #moth rect { stroke-linecap: round; stroke-linejoin: round; }
+#moth .moth-wing { fill: var(--code-inline-bg); stroke: var(--fg-muted); stroke-width: 1.6; }
+#moth .moth-body { fill: var(--fg-muted); stroke: var(--fg-muted); stroke-width: 1; }
+#moth .moth-face { fill: var(--code-inline-bg); stroke: var(--fg-muted); stroke-width: 1.6; }
+#moth .moth-antenna { fill: none; stroke: var(--fg-muted); stroke-width: 1.6; }
+#moth .moth-eye { fill: var(--bg); stroke: none; }
+#moth .moth-pupil { fill: var(--fg); }
+#moth .moth-lids { display: none; fill: none; stroke: var(--fg); stroke-width: 1.4; }
+#moth .moth-glasses { fill: none; stroke: var(--link); stroke-width: 1.6; }
+#moth .moth-zzz { display: none; fill: var(--fg-muted); font: italic 600 11px var(--font-body); }
+#moth .moth-zzz-2 { font-size: 8px; }
+#moth .moth-book { fill: var(--bg); stroke: var(--link); stroke-width: 1.6; }
+#moth .moth-book .moth-lines { stroke: var(--fg-muted); stroke-width: 1; }
+#moth .moth-book-closed { display: none; }
+#moth.book-closed .moth-book-open { display: none; }
+#moth.book-closed .moth-book-closed { display: block; }
+#moth.dozing .moth-eyes { display: none; }
+#moth.dozing .moth-lids, #moth.dozing .moth-zzz { display: block; }
+#moth .moth-head { transform-origin: 60px 60px; }
+@media (prefers-reduced-motion: no-preference) {
+  #moth.nodding .moth-head { animation: moth-nod 0.28s ease-in-out 3; }
+  @keyframes moth-nod { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(3px); } }
+}
+@media (prefers-reduced-motion: reduce) {
+  #moth { transition: none; }
+  #moth.nodding .moth-head { transform: translateY(3px); }
+}
+
 /* ---- Motion -------------------------------------------------------- */
 
 html { scroll-behavior: smooth; }

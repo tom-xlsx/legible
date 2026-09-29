@@ -7,7 +7,9 @@ import Observation
 /// not parse keeps the last good settings and reports which line is wrong.
 @Observable
 final class SettingsStore {
-    static let shared = SettingsStore(fileURL: AppInfo.supportDirectory.appendingPathComponent("settings.toml"))
+    /// LEGIBLE_SETTINGS=/path/to/file.toml points the app at a different settings file (used by tests).
+    static let shared = SettingsStore(fileURL: ProcessInfo.processInfo.environment["LEGIBLE_SETTINGS"].map { URL(fileURLWithPath: $0) }
+        ?? AppInfo.supportDirectory.appendingPathComponent("settings.toml"))
     static let didChange = Notification.Name("LegibleSettingsDidChange")
 
     let fileURL: URL
