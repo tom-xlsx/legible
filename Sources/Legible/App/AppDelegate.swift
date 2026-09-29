@@ -14,7 +14,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         if launchOptions.printDocuments {
-            if NSDocumentController.shared.documents.isEmpty { restoredSession = Session.restore() }
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
                 let names = NSDocumentController.shared.documents.compactMap { $0.fileURL?.lastPathComponent }
                 print("documents: \(names.isEmpty ? "(none)" : names.joined(separator: ", "))")
@@ -28,8 +27,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         } else if let job = SelfTestJob(options: launchOptions) {
             selfTestJob = job
             job.run()
-        } else if NSDocumentController.shared.documents.isEmpty {
-            restoredSession = Session.restore()
         }
     }
 
@@ -49,10 +46,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     // Launched with nothing to show (or Dock icon clicked with no windows): offer the open panel.
     func applicationShouldOpenUntitledFile(_ sender: NSApplication) -> Bool {
-        !launchOptions.isHeadless && !launchOptions.printDocuments && !restoredSession
+        !launchOptions.isHeadless
     }
 
+    // AppKit calls this only when the app was launched with nothing to open (and
+    // when the Dock icon is clicked with no windows). At launch, bring back the
+    // last session; otherwise offer the open panel.
     func applicationOpenUntitledFile(_ sender: NSApplication) -> Bool {
+        if !restoredSession {
+            restoredSession = true
+            if Session.restore() { return true }
+        }
+        if launchOptions.printDocuments { return true }
         NSDocumentController.shared.openDocument(nil)
         return true
     }
