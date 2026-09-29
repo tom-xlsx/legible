@@ -155,6 +155,9 @@ final class SnapshotJob {
                 }
                 let overlays: [NSView] = self.options.captureWindow ? [controller.tocViewForTesting, controller.editor, controller.findBarForTesting, controller.noticeBarForTesting] : []
                 DispatchQueue.main.asyncAfter(deadline: .now() + self.options.delay) {
+                    controller.preview.evaluate("JSON.stringify(window.LegibleMoth ? LegibleMoth.status() : null)") { status in
+                        print("moth: \(status as? String ?? "none")")
+                    }
                     controller.preview.evaluate("Legible.topLine()") { line in
                         let editorLine = controller.isEditorVisible ? ", editor top line \(controller.editor.topLine)" : ""
                         print("preview top line \(line ?? "?")\(editorLine); notice: \(controller.noticeBarForTesting.isHidden ? "hidden" : controller.noticeBarForTesting.message); subtitle: \"\(window.subtitle)\"; current heading: \(controller.toc.currentID ?? "none")")
@@ -171,6 +174,7 @@ final class SnapshotJob {
     }
 
     private func write(_ png: Data, width: Int, height: Int) -> Never {
+        MothBookmarks.shared.save()
         do { try png.write(to: output) } catch { fail("cannot write \(output.path): \(error.localizedDescription)") }
         print("Wrote \(output.path) (\(width)×\(height))")
         if errors.isEmpty { exit(0) }

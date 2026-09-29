@@ -72,7 +72,9 @@
     flyTo(point, path, done) {
       this.cancelFlight();
       const from = { ...this.position };
-      if (reduceMotion() || !this.visible) {
+      // No animation under Reduce Motion, when not shown, or when nobody can see the page
+      // (animation frames do not run in a hidden page, so a flight would never finish).
+      if (reduceMotion() || !this.visible || document.hidden) {
         this.moveTo(point);
         if (done) done();
         return;

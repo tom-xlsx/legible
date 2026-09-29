@@ -22,21 +22,16 @@
     return { next, between: (lo, hi) => lo + (hi - lo) * next(), pick: (list) => list[Math.floor(next() * list.length)] };
   }
 
-  // ---- Time (scaled for testing; pauses while the window is hidden) -------------
+  // ---- Time (scaled for testing). One-shot timers are cheap and always fire; the
+  // periodic tick skips its work while the page is hidden, so nothing animates or
+  // accrues (dozing, droppings, relocation) in a window nobody can see.
   const clock = {
     scale: 1,
     timers: new Set(),
     after(ms, fn) {
-      const handle = { fn, due: performance.now() + ms / this.scale, id: 0 };
-      const arm = () => {
-        handle.id = setTimeout(() => {
-          this.timers.delete(handle);
-          if (document.hidden) { handle.due = performance.now() + 250; this.timers.add(handle); arm(); return; }
-          fn();
-        }, Math.max(0, handle.due - performance.now()));
-      };
+      const handle = { fn, id: 0 };
+      handle.id = setTimeout(() => { this.timers.delete(handle); fn(); }, Math.max(0, ms / this.scale));
       this.timers.add(handle);
-      arm();
       return handle;
     },
     cancel(handle) { if (handle) { clearTimeout(handle.id); this.timers.delete(handle); } },
@@ -263,16 +258,26 @@
       invalidateGeometry();
       this.setState('absent');
       this.adapter.setVisible(false);
-      if (bookmark && bookmark.line !== undefined) {
-        // Already perched where the reading left off; no fly-in.
-        const y = yForLine(bookmark.line) ?? window.scrollY + window.innerHeight * 0.4;
-        const perch = choosePerch(this.adapter, y, this.rng);
-        if (perch) { this.settle(perch, { immediate: true }); }
+      this.pendingBookmark = !!(bookmark && bookmark.line !== undefined);
+      if (this.pendingBookmark) {
+        // Already perched where the reading left off; no fly-in. The page may not have
+        // rendered yet, in which case afterRender() completes this.
+        this.tryBookmark();
       } else {
-        this.schedule('arrive', clock.seconds(this.rng.between(18, 40)), () => this.arrive());
+        this.schedule('arrive', clock.seconds(this.rng.between(4, 9)), () => this.arrive());
       }
       this.maybeNibble();
       this.schedule('tick', clock.seconds(5), () => this.tick());
+    },
+
+    tryBookmark() {
+      if (!this.pendingBookmark || !this.adapter || !root.children.length) return;
+      const line = this.config.bookmark.line;
+      const y = yForLine(line) ?? window.scrollY + window.innerHeight * 0.4;
+      const perch = choosePerch(this.adapter, y, this.rng);
+      if (!perch) return;
+      this.pendingBookmark = false;
+      this.settle(perch, { immediate: true });
     },
 
     setState(s) { this.state = s; this.note(s); this.adapter.element.dataset.state = s; },
@@ -312,7 +317,7 @@
       if (this.state !== 'absent') return;
       const y = window.scrollY + window.innerHeight * 0.4;
       const perch = choosePerch(this.adapter, y, this.rng);
-      if (!perch) { this.schedule('arrive', clock.seconds(20), () => this.arrive()); return; }
+      if (!perch) { this.schedule('arrive', clock.seconds(3), () => this.arrive()); return; }
       const edge = nearestEdgePoint(perch);
       this.adapter.moveTo(edge);
       this.settle(perch);
@@ -322,7 +327,8 @@
     reposition() {
       if (!this.adapter) return;
       invalidateGeometry();
-      if (this.state === 'absent' || this.state === 'held') return;
+      if (this.state === 'absent') { this.tryBookmark(); return; }
+      if (this.state === 'held') return;
       const target = this.state === 'watching-editor' ? this.editorPerch() : resolvePerch(this.perch, this.adapter);
       if (target) { this.perch = target.perch; this.perchPoint = { x: target.x, y: target.y }; this.adapter.moveTo(this.perchPoint); }
       else {
@@ -573,7 +579,10 @@
       droppings() { M.leaveDroppings(); },
       nibble() { M.nibbleShown = false; M.showNibble(); },
       doze() { M.lastActivity = -1e12; M.tick(); },
-      status() { return { state: M.state, perch: M.perch, point: M.perchPoint, droppings: M.droppings.length, nibble: M.nibbleShown, log: M.log.slice() }; },
+      status() {
+        return { state: M.state, perch: M.perch, point: M.perchPoint, droppings: M.droppings.length, nibble: M.nibbleShown,
+          hidden: document.hidden, timers: [...clock.timers].length, pending: Object.keys(M.timers), log: M.log.slice() };
+      },
     },
 
     test: {
@@ -644,7 +653,18 @@
     speck.el.style.top = `${Math.round(y)}px`;
   }
 
-  function currentLine() { return window.Legible && window.Legible.topLine ? window.Legible.topLine() : 0; }
+  /** Source line of the block at a page y (so a perch can be found again after reopening). */
+  function lineForY(y) {
+    let best = null;
+    for (const el of root.querySelectorAll('[data-line]')) {
+      if (el.closest('.footnotes')) continue;
+      const top = pageRect(el).top;
+      if (top <= y + 4 && (!best || top > best.top)) best = { top, line: Number(el.dataset.line) };
+    }
+    return best ? best.line : (window.Legible && window.Legible.topLine ? window.Legible.topLine() : 0);
+  }
+
+  function currentLine() { return M.perchPoint ? lineForY(M.perchPoint.y) : (window.Legible && window.Legible.topLine ? window.Legible.topLine() : 0); }
 
   function yForLine(line) {
     const items = [...root.querySelectorAll('[data-line]')].map((el) => ({ line: Number(el.dataset.line), top: pageRect(el).top }))

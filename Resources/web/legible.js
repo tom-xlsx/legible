@@ -459,6 +459,7 @@
       updateFocus();
 
       whenImagesSettled().then(() => {
+        if (window.LegibleGarnish) window.LegibleGarnish.afterRender();   // images may have moved things
         post({ type: 'rendered', words: wordCount(), headings, codeBlocks: rawCode.length });
       });
     },
