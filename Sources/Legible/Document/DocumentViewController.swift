@@ -244,11 +244,10 @@ final class DocumentViewController: NSViewController {
     func showEditor() {
         guard !isEditorVisible else { return }
         editor.text = document.text
-        editorItem.isCollapsed = false
         let saved = UserDefaults.standard.double(forKey: Self.editorWidthKey)
-        let width = saved > 0 ? CGFloat(saved) : split.view.bounds.width / 2
         let leading = isTOCVisible ? tocView.frame.width + dividerThickness : 0
-        split.splitView.setPosition(leading + max(240, min(width, split.view.bounds.width - leading - 320)), ofDividerAt: 1)
+        let width = max(240, min(saved > 0 ? CGFloat(saved) : split.view.bounds.width / 2, split.view.bounds.width - leading - 320))
+        expand(editorItem, view: editor, dividerIndex: 1, position: leading + width, width: width)
         editor.scroll(toLine: 0)
         view.window?.makeFirstResponder(editor.textView)
         view.window?.toolbar?.validateVisibleItems()
@@ -270,10 +269,25 @@ final class DocumentViewController: NSViewController {
 
     func showTOC() {
         guard !isTOCVisible else { return }
-        tocItem.isCollapsed = false
         let saved = UserDefaults.standard.double(forKey: Self.tocWidthKey)
-        split.splitView.setPosition(saved > 0 ? CGFloat(saved) : 230, ofDividerAt: 0)
+        let width = max(160, min(saved > 0 ? CGFloat(saved) : 230, 360))
+        expand(tocItem, view: tocView, dividerIndex: 0, position: width, width: width)
         view.window?.toolbar?.validateVisibleItems()
+    }
+
+    /// Expands a pane with a single layout pass: the pane is given its width before it
+    /// uncollapses, so the preview resizes once instead of twice (which showed as a flicker).
+    private func expand(_ item: NSSplitViewItem, view pane: NSView, dividerIndex: Int, position: CGFloat, width: CGFloat) {
+        pane.frame.size.width = width
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0
+            context.allowsImplicitAnimation = false
+            item.isCollapsed = false
+            split.splitView.layoutSubtreeIfNeeded()
+            if abs(pane.frame.width - width) > 1 {
+                split.splitView.setPosition(position, ofDividerAt: dividerIndex)
+            }
+        }
     }
 
     func hideTOC() {
