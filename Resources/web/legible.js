@@ -386,11 +386,34 @@
     programmaticScroll(() => window.scrollTo({ top: Math.max(0, y - 16), behavior: 'instant' }));
   }
 
+  /** Id of the heading being read: the last one at or above the reading line. */
+  function currentHeading() {
+    const line = window.innerHeight * 0.3;
+    let current = null;
+    for (const h of root.querySelectorAll('h1, h2, h3, h4, h5, h6')) {
+      if (h.getBoundingClientRect().top <= line) current = h.id; else break;
+    }
+    if (!current) {
+      const first = root.querySelector('h1, h2, h3, h4, h5, h6');
+      current = first ? first.id : null;
+    }
+    return current;
+  }
+
+  function scrollToHeading(id) {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ block: 'start' });
+  }
+
   let scrollFrame = 0;
+  function reportScroll() {
+    cancelAnimationFrame(scrollFrame);
+    scrollFrame = requestAnimationFrame(() => post({ type: 'scroll', line: topLine(), heading: currentHeading(),
+      atEnd: window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2 }));
+  }
   window.addEventListener('scroll', () => {
     if (suppressScrollReports) return;
-    cancelAnimationFrame(scrollFrame);
-    scrollFrame = requestAnimationFrame(() => post({ type: 'scroll', line: topLine() }));
+    reportScroll();
   }, { passive: true });
 
   // ---- Public API (called from Swift) ------------------------------------
@@ -445,7 +468,9 @@
     findStatus,
     selfTest,
     scrollToLine,
+    scrollToHeading,
     topLine,
+    currentHeading,
   };
 
   window.Legible = Legible;

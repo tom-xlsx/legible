@@ -14,6 +14,7 @@ struct LaunchOptions {
     var zoom: Double?
     var captureWindow = false
     var showEditor = false
+    var showTOC = false
     var save = false
     var printDocuments = false
     var settingsPane: String?
@@ -26,6 +27,7 @@ struct LaunchOptions {
         for argument in arguments {
             if argument == "--window" { captureWindow = true; continue }
             if argument == "--editor" { showEditor = true; continue }
+            if argument == "--toc" { showTOC = true; continue }
             if argument == "--save" { save = true; continue }
             if argument == "--print-documents" { printDocuments = true; continue }
             guard argument.hasPrefix("--"), let eq = argument.firstIndex(of: "=") else { continue }
@@ -53,7 +55,7 @@ struct LaunchOptions {
 }
 
 /// `Legible --snapshot=in.md --out=out.png [--theme=id] [--size=WxH] [--scroll=Y|selector]
-///          [--zoom=1.3] [--eval=JS] [--find=query] [--window] [--delay=seconds] [--editor] [--edit=text] [--save]`
+///          [--zoom=1.3] [--eval=JS] [--find=query] [--window] [--delay=seconds] [--editor] [--edit=text] [--save] [--toc]`
 /// --editor opens the editor pane; --edit appends text to it (and implies --editor).
 /// Renders a document, writes a PNG of the viewport (or the whole window with
 /// --window, which includes AppKit overlays such as the find bar), and exits
@@ -102,6 +104,7 @@ final class SnapshotJob {
                 controller.onRendered = nil
                 if let zoom = options.zoom { Zoom.level = zoom }
                 if options.showEditor || options.editText != nil { controller.showEditor() }
+                if options.showTOC { controller.showTOC() }
                 if let text = options.editText {
                     controller.editor.textView.setSelectedRange(NSRange(location: (controller.editor.text as NSString).length, length: 0))
                     controller.editor.textView.insertText(text, replacementRange: controller.editor.textView.selectedRange())
@@ -115,9 +118,8 @@ final class SnapshotJob {
                     }
                 }
                 if let scroll = options.scroll {
-                    // With the editor open, wait out the scroll-sync feedback guard first, as a person would.
-                    let wait = controller.isEditorVisible ? 0.4 : 0
-                    DispatchQueue.main.asyncAfter(deadline: .now() + wait) { controller.preview.scroll(to: scroll) }
+                    // Wait out the render's own scroll and the sync feedback guard first, as a person would.
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { controller.preview.scroll(to: scroll) }
                 }
                 if let js = options.eval { controller.preview.evaluate(js) { _ in } }
                 if let query = options.find {
@@ -125,11 +127,12 @@ final class SnapshotJob {
                     controller.findBarForTesting.searchField.stringValue = query
                     controller.findNext(backwards: false)
                 }
-                let overlays: [NSView] = self.options.captureWindow ? [controller.editor, controller.findBarForTesting, controller.noticeBarForTesting] : []
+                let overlays: [NSView] = self.options.captureWindow ? [controller.tocViewForTesting, controller.editor, controller.findBarForTesting, controller.noticeBarForTesting] : []
                 DispatchQueue.main.asyncAfter(deadline: .now() + self.options.delay) {
                     controller.preview.evaluate("Legible.topLine()") { line in
                         let editorLine = controller.isEditorVisible ? ", editor top line \(controller.editor.topLine)" : ""
-                        print("preview top line \(line ?? "?")\(editorLine); notice: \(controller.noticeBarForTesting.isHidden ? "hidden" : controller.noticeBarForTesting.message)")
+                        print("preview top line \(line ?? "?")\(editorLine); notice: \(controller.noticeBarForTesting.isHidden ? "hidden" : controller.noticeBarForTesting.message); subtitle: \"\(window.subtitle)\"; current heading: \(controller.toc.currentID ?? "none")")
+                        print("panes: toc hidden=\(controller.tocViewForTesting.isHidden) \(controller.tocViewForTesting.frame); editor hidden=\(controller.editor.isHidden) \(controller.editor.frame); preview \(controller.preview.frame)")
                         self.capture(controller.preview.webView, in: controller.view, overlays: overlays)
                     }
                 }

@@ -36,6 +36,7 @@ final class DocumentWindowController: NSWindowController {
     }
 
     @objc func toggleEditor(_ sender: Any?) { viewController.toggleEditor() }
+    @objc func toggleTOC(_ sender: Any?) { viewController.toggleTOC() }
 
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("not supported") }
@@ -66,6 +67,9 @@ extension DocumentWindowController: NSMenuItemValidation {
         case #selector(toggleEditor(_:)):
             menuItem.title = viewController.isEditorVisible ? "Hide Editor" : "Show Editor"
             return true
+        case #selector(toggleTOC(_:)):
+            menuItem.title = viewController.isTOCVisible ? "Hide Table of Contents" : "Show Table of Contents"
+            return true
         case #selector(showInFinder(_:)), #selector(reloadDocument(_:)):
             return markdownDocument?.fileURL != nil
         case #selector(zoomIn(_:)): return Zoom.level < Zoom.maximum
@@ -80,34 +84,50 @@ extension DocumentWindowController: NSMenuItemValidation {
 
 extension DocumentWindowController: NSToolbarDelegate, NSToolbarItemValidation {
     private static let editorItem = NSToolbarItem.Identifier("toggleEditor")
+    private static let tocItem = NSToolbarItem.Identifier("toggleTOC")
 
     func toolbarAllowedItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
-        [.flexibleSpace, Self.editorItem]
+        [Self.tocItem, .flexibleSpace, Self.editorItem]
     }
 
     func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
-        [.flexibleSpace, Self.editorItem]
+        [Self.tocItem, .flexibleSpace, Self.editorItem]
     }
 
     func toolbar(_ toolbar: NSToolbar, itemForItemIdentifier itemIdentifier: NSToolbarItem.Identifier,
                  willBeInsertedIntoToolbar flag: Bool) -> NSToolbarItem? {
-        guard itemIdentifier == Self.editorItem else { return nil }
         let item = NSToolbarItem(itemIdentifier: itemIdentifier)
-        item.label = "Editor"
-        item.paletteLabel = "Editor"
-        item.toolTip = "Show or hide the editor (⌘E)"
-        item.image = NSImage(systemSymbolName: "square.split.2x1", accessibilityDescription: "Editor")
+        switch itemIdentifier {
+        case Self.editorItem:
+            item.label = "Editor"
+            item.toolTip = "Show or hide the editor (⌘E)"
+            item.image = NSImage(systemSymbolName: "square.split.2x1", accessibilityDescription: "Editor")
+            item.action = #selector(toggleEditor(_:))
+        case Self.tocItem:
+            item.label = "Contents"
+            item.toolTip = "Show or hide the table of contents (⌘⌥T)"
+            item.image = NSImage(systemSymbolName: "sidebar.left", accessibilityDescription: "Table of contents")
+            item.action = #selector(toggleTOC(_:))
+        default:
+            return nil
+        }
+        item.paletteLabel = item.label
         item.target = self
-        item.action = #selector(toggleEditor(_:))
         item.isBordered = true
         item.autovalidates = true
         return item
     }
 
     func validateToolbarItem(_ item: NSToolbarItem) -> Bool {
-        if item.itemIdentifier == Self.editorItem {
+        switch item.itemIdentifier {
+        case Self.editorItem:
             item.image = NSImage(systemSymbolName: viewController.isEditorVisible ? "square.split.2x1.fill" : "square.split.2x1",
                                  accessibilityDescription: "Editor")
+        case Self.tocItem:
+            item.image = NSImage(systemSymbolName: viewController.isTOCVisible ? "sidebar.left" : "sidebar.leading",
+                                 accessibilityDescription: "Table of contents")
+        default:
+            break
         }
         return true
     }

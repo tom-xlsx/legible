@@ -14,8 +14,13 @@ final class PreviewView: NSView {
     let webView: WKWebView
     var onRendered: ((RenderInfo) -> Void)?
     var onError: ((String) -> Void)?
-    /// Fractional source line at the top of the viewport, reported as the user scrolls.
-    var onScroll: ((Double) -> Void)?
+    struct ScrollInfo {
+        let line: Double
+        let headingID: String?
+        let atEnd: Bool
+    }
+    /// Reported as the user scrolls: top source line, heading being read, whether the end is in view.
+    var onScroll: ((ScrollInfo) -> Void)?
 
     /// Navigations the page attempted that were not the page itself (self-test counts these).
     private(set) var blockedNavigations = 0
@@ -82,6 +87,10 @@ final class PreviewView: NSView {
         } else {
             call("document.querySelector(\(jsLiteral(target)))?.scrollIntoView({block: 'start', behavior: 'instant'})")
         }
+    }
+
+    func scroll(toHeading id: String) {
+        call("Legible.scrollToHeading(\(jsLiteral(id)))")
     }
 
     /// Scrolls the preview so the given (fractional, zero-based) source line is at the top.
@@ -165,7 +174,9 @@ final class PreviewView: NSView {
                                    headings: headings,
                                    codeBlocks: message["codeBlocks"] as? Int ?? 0))
         case "scroll":
-            if let line = message["line"] as? Double { onScroll?(line) }
+            if let line = message["line"] as? Double {
+                onScroll?(ScrollInfo(line: line, headingID: message["heading"] as? String, atEnd: message["atEnd"] as? Bool ?? false))
+            }
         case "copy":
             let pasteboard = NSPasteboard.general
             pasteboard.clearContents()

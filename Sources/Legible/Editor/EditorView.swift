@@ -149,7 +149,8 @@ final class EditorView: NSView {
 
     /// The fractional line at the top of the visible rect.
     var topLine: Double {
-        guard let layout = textView.layoutManager, let container = textView.textContainer else { return 0 }
+        guard let layout = textView.layoutManager, let container = textView.textContainer,
+              !textView.string.isEmpty else { return 0 }
         let visible = scrollView.contentView.bounds
         let y = max(0, visible.origin.y - textView.textContainerInset.height)
         let glyph = layout.glyphIndex(for: NSPoint(x: 0, y: y), in: container)
