@@ -171,6 +171,133 @@
     return root.innerText.split(/\s+/).filter(Boolean).length;
   }
 
+  // ---- Copy buttons ------------------------------------------------------
+
+  const state = { copyMessages: ['Copied.'] };
+
+  function addCopyButtons() {
+    for (const block of root.querySelectorAll('.code-block[data-code]')) {
+      const index = Number(block.dataset.code);
+      if (!(index in rawCode)) continue;
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'copy';
+      button.textContent = 'Copy';
+      const lang = block.dataset.lang;
+      button.setAttribute('aria-label', lang ? `Copy ${lang} code` : 'Copy code');
+      button.addEventListener('click', () => {
+        post({ type: 'copy', text: copyText(index) });
+        const message = state.copyMessages[Math.floor(Math.random() * state.copyMessages.length)];
+        button.textContent = message;
+        button.classList.add('copied');
+        clearTimeout(button._timer);
+        button._timer = setTimeout(() => {
+          button.textContent = 'Copy';
+          button.classList.remove('copied');
+        }, 1400);
+      });
+      block.appendChild(button);
+    }
+  }
+
+  /** The raw fence content minus the single newline that terminates its last line. */
+  function copyText(index) {
+    const raw = rawCode[index] || '';
+    return raw.endsWith('\n') ? raw.slice(0, -1) : raw;
+  }
+
+  // ---- Find ----------------------------------------------------------------
+
+  function textMatches(query) {
+    const needle = query.toLowerCase();
+    const matches = [];
+    if (!needle) return matches;
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    let node;
+    while ((node = walker.nextNode())) {
+      const text = node.nodeValue.toLowerCase();
+      let at = text.indexOf(needle);
+      while (at !== -1) {
+        matches.push({ node, offset: at });
+        at = text.indexOf(needle, at + needle.length);
+      }
+    }
+    return matches;
+  }
+
+  /** {index (1-based, 0 if none selected), total} for the current selection. */
+  function findStatus(query) {
+    const matches = textMatches(query);
+    const sel = window.getSelection();
+    let index = 0;
+    if (matches.length && sel && sel.rangeCount) {
+      const range = sel.getRangeAt(0);
+      for (let i = 0; i < matches.length; i++) {
+        const m = matches[i];
+        const probe = document.createRange();
+        probe.setStart(m.node, m.offset);
+        probe.setEnd(m.node, m.offset);
+        if (probe.compareBoundaryPoints(Range.START_TO_START, range) === 0) { index = i + 1; break; }
+        if (probe.compareBoundaryPoints(Range.START_TO_START, range) > 0) break;
+      }
+    }
+    return { index, total: matches.length };
+  }
+
+  // ---- Self-test -----------------------------------------------------------
+  // Assertions about the rendered kitchen sink; returns a list of failures.
+
+  function selfTest() {
+    const failures = [];
+    const assert = (ok, message) => { if (!ok) failures.push(message); };
+
+    assert(document.title === 'Legible', `document.title was changed to "${document.title}"`);
+    const forbidden = 'script, iframe, object, embed, form, button:not(.copy), textarea, select, style, link, meta, base, svg, math, video, audio, input:not([type=checkbox])';
+    assert(root.querySelectorAll(forbidden).length === 0, `forbidden elements survived: ${[...root.querySelectorAll(forbidden)].map((e) => e.tagName).join(', ')}`);
+    for (const el of root.querySelectorAll('*')) {
+      for (const attr of el.attributes) {
+        assert(!/^on/i.test(attr.name), `event handler attribute survived: <${el.tagName.toLowerCase()} ${attr.name}>`);
+        assert(attr.name !== 'style', `style attribute survived on <${el.tagName.toLowerCase()}>`);
+      }
+    }
+    assert(root.querySelectorAll('a[href^="javascript:" i]').length === 0, 'javascript: link survived');
+    for (const img of root.querySelectorAll('img')) {
+      const src = img.getAttribute('src') || '';
+      if (/^(https?|file):/i.test(src) || src.includes('not-a-token')) {
+        assert(!(img.complete && img.naturalWidth > 0), `image loaded from ${src}`);
+      }
+    }
+    const marker = [...root.querySelectorAll('p')].find((p) => p.textContent.startsWith('End of the malicious section'));
+    assert(marker && marker.offsetParent !== null, 'end-of-section marker is not visible');
+    assert(getComputedStyle(document.body).display !== 'none', 'body was hidden');
+    assert(root.querySelectorAll('input[type=checkbox]:not([disabled])').length === 0, 'an enabled checkbox survived');
+
+    const local = [...root.querySelectorAll('img[src^="legible-doc:"]')].filter((i) => i.getAttribute('src').endsWith('gradient.png'));
+    assert(local.length > 0 && local.every((i) => i.naturalWidth > 0), 'relative image gradient.png did not load');
+
+    const blocks = [...root.querySelectorAll('.code-block')];
+    assert(blocks.length >= 10, `expected at least 10 code blocks, found ${blocks.length}`);
+    assert(blocks.every((b) => b.querySelector('button.copy')), 'a code block has no copy button');
+    const plain = blocks.find((b) => b.textContent.includes('A fence with no language'));
+    assert(plain && !plain.hasAttribute('data-lang'), 'unlabelled fence has a language label');
+    const text = plain ? copyText(Number(plain.dataset.code)) : '';
+    assert(text.endsWith('whitespace.   '), 'copy text lost trailing whitespace or kept the final newline');
+    assert(text.startsWith('A fence with no language. Copy should return exactly this,'), 'copy text does not start with the raw source');
+    const html = blocks.find((b) => b.dataset.lang === 'html');
+    assert(html && html.textContent.includes('<script>alert("this is text, not a script")</script>'), 'html code block did not show its source as text');
+    assert(root.querySelector('.code-block[data-lang="mermaid"]'), 'mermaid fence is not a plain code block');
+
+    const ids = [...root.querySelectorAll('h1, h2, h3, h4, h5, h6')].map((h) => h.id);
+    assert(new Set(ids).size === ids.length, `duplicate heading ids: ${ids.join(', ')}`);
+    assert(ids.includes('level-three') && ids.includes('level-three-1'), 'heading id de-duplication failed');
+    assert(root.querySelector('details.front-matter'), 'front matter block missing');
+    assert(!root.textContent.includes('title: Kitchen Sink') || root.querySelector('.front-matter pre'), 'front matter leaked into the body');
+    assert(root.querySelectorAll('.footnotes li').length === 2, 'footnotes missing');
+    assert(root.querySelectorAll('.task-list-item').length === 3, 'task list items missing');
+
+    return failures;
+  }
+
   // ---- Public API (called from Swift) ------------------------------------
 
   const Legible = {
@@ -188,6 +315,7 @@
       root.innerHTML = window.DOMPurify.sanitize(html, PURIFY_OPTIONS);
       const headings = assignHeadingIds();
       resolveRelativeUrls(docBase);
+      addCopyButtons();
 
       if (anchor) restoreScroll(anchor);
       else if (!preserveScroll) window.scrollTo({ top: 0, behavior: 'instant' });
@@ -204,6 +332,15 @@
     codeAt(index) {
       return rawCode[index];
     },
+
+    configure(options) {
+      if (Array.isArray(options.copyMessages) && options.copyMessages.length) {
+        state.copyMessages = options.copyMessages;
+      }
+    },
+
+    findStatus,
+    selfTest,
   };
 
   window.Legible = Legible;

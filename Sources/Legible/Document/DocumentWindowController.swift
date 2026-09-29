@@ -38,6 +38,13 @@ final class DocumentWindowController: NSWindowController {
         NSWorkspace.shared.activateFileViewerSelecting([url])
     }
 
+    @objc func showFind(_ sender: Any?) { viewController.showFind() }
+    @objc func findNext(_ sender: Any?) { viewController.findNext(backwards: false) }
+    @objc func findPrevious(_ sender: Any?) { viewController.findNext(backwards: true) }
+    @objc func zoomIn(_ sender: Any?) { Zoom.step(+1) }
+    @objc func zoomOut(_ sender: Any?) { Zoom.step(-1) }
+    @objc func zoomActual(_ sender: Any?) { Zoom.level = 1 }
+
     @objc func reloadDocument(_ sender: Any?) {
         guard let doc = markdownDocument, let url = doc.fileURL else { return }
         do {
@@ -54,6 +61,10 @@ extension DocumentWindowController: NSMenuItemValidation {
         switch menuItem.action {
         case #selector(showInFinder(_:)), #selector(reloadDocument(_:)):
             return markdownDocument?.fileURL != nil
+        case #selector(zoomIn(_:)): return Zoom.level < Zoom.maximum
+        case #selector(zoomOut(_:)): return Zoom.level > Zoom.minimum
+        case #selector(zoomActual(_:)): return Zoom.level != 1
+        case #selector(findNext(_:)), #selector(findPrevious(_:)): return viewController.hasFindQuery
         default:
             return true
         }

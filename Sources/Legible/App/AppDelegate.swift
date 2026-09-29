@@ -3,6 +3,7 @@ import AppKit
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private let launchOptions = LaunchOptions(arguments: CommandLine.arguments)
     private var snapshotJob: SnapshotJob?
+    private var selfTestJob: SelfTestJob?
 
     func applicationWillFinishLaunching(_ notification: Notification) {
         NSWindow.allowsAutomaticWindowTabbing = false
@@ -13,6 +14,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         if let job = SnapshotJob(options: launchOptions) {
             snapshotJob = job
+            job.run()
+        } else if let job = SelfTestJob(options: launchOptions) {
+            selfTestJob = job
             job.run()
         }
     }

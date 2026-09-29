@@ -62,6 +62,8 @@ A theme is a header comment plus a `:root` block:
 - GitHub-flavoured Markdown: tables, task lists, strikethrough, footnotes, autolinks, syntax highlighting.
 - YAML front matter is shown as a small collapsed block.
 - Relative images and links resolve within the document's git repository (or its folder when there is no repository). Links to other Markdown files open in Legible; external links open in your browser.
+- Every code block has a copy button (hover, or Tab to it). It copies the fence's raw source, minus only the newline that ends its last line.
+- Zoom with ⌘+ / ⌘− / ⌘0, find with ⌘F (⌘G and ⌘⇧G step through matches).
 - Raw HTML is limited to the safe subset READMEs actually use (`details`, `summary`, `img` with `align`/`width`, `picture`, `kbd`, `sup`, `sub`, `br`, `div align`, tables). Scripts, event handlers, iframes, forms, styles and anything that could run code or phone home are stripped.
 
 ## Icebox

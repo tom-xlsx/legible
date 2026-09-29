@@ -15,6 +15,9 @@ final class PreviewView: NSView {
     var onRendered: ((RenderInfo) -> Void)?
     var onError: ((String) -> Void)?
 
+    /// Navigations the page attempted that were not the page itself (self-test counts these).
+    private(set) var blockedNavigations = 0
+
     private let bridge = Bridge()
     private var isReady = false
     private var queue: [String] = []
@@ -69,6 +72,47 @@ final class PreviewView: NSView {
         call("window.scrollTo({top: \(y), behavior: 'instant'})")
     }
 
+    var zoom: CGFloat {
+        get { webView.pageZoom }
+        set { webView.pageZoom = newValue }
+    }
+
+    /// Selects the next/previous match and reports "index of total".
+    func find(_ query: String, backwards: Bool, completion: @escaping (_ index: Int, _ total: Int) -> Void) {
+        guard !query.isEmpty else { completion(0, 0); return }
+        let config = WKFindConfiguration()
+        config.backwards = backwards
+        config.caseSensitive = false
+        config.wraps = true
+        webView.find(query, configuration: config) { [weak self] _ in
+            self?.findStatus(query, completion: completion)
+        }
+    }
+
+    func findStatus(_ query: String, completion: @escaping (_ index: Int, _ total: Int) -> Void) {
+        evaluate("Legible.findStatus(\(jsLiteral(query)))") { result in
+            let dict = result as? [String: Any]
+            completion(dict?["index"] as? Int ?? 0, dict?["total"] as? Int ?? 0)
+        }
+    }
+
+    func clearSelection() {
+        call("window.getSelection().removeAllRanges()")
+    }
+
+    /// Runs `js` once the page is ready and hands back its result.
+    func evaluate(_ js: String, completion: @escaping (Any?) -> Void) {
+        guard isReady else {
+            queue.append(js)   // fire-and-forget while loading; results only matter once ready
+            completion(nil)
+            return
+        }
+        webView.evaluateJavaScript(js) { [weak self] result, error in
+            if let error { self?.report("evaluateJavaScript: \(error.localizedDescription)") }
+            completion(result)
+        }
+    }
+
     private func call(_ js: String) {
         guard isReady else { queue.append(js); return }
         webView.evaluateJavaScript(js) { [weak self] _, error in
@@ -103,6 +147,10 @@ final class PreviewView: NSView {
             onRendered?(RenderInfo(words: message["words"] as? Int ?? 0,
                                    headings: headings,
                                    codeBlocks: message["codeBlocks"] as? Int ?? 0))
+        case "copy":
+            let pasteboard = NSPasteboard.general
+            pasteboard.clearContents()
+            pasteboard.setString(message["text"] as? String ?? "", forType: .string)
         case "error":
             report(message["message"] as? String ?? "unknown JS error")
         default:
@@ -136,7 +184,11 @@ extension PreviewView: WKNavigationDelegate {
             return
         }
         decisionHandler(.cancel)
-        guard navigationAction.navigationType == .linkActivated else { return }
+        guard navigationAction.navigationType == .linkActivated else {
+            blockedNavigations += 1
+            NSLog("Legible: blocked navigation to %@", url.absoluteString)
+            return
+        }
         LinkOpener.open(url)
     }
 

@@ -166,6 +166,26 @@ kbd {
   pointer-events: none;
 }
 
+/* Copy button: shown on hover; always present to keyboard and VoiceOver users
+   (opacity does not remove it from the accessibility tree). */
+.code-block .copy {
+  position: absolute; top: 0.45em; right: 0.5em;
+  font: 500 0.75em/1 var(--font-body);
+  color: var(--copy-fg);
+  background: var(--copy-bg);
+  border: 1px solid var(--copy-border);
+  border-radius: 5px;
+  padding: 0.4em 0.7em;
+  cursor: default;
+  opacity: 0;
+  transition: opacity 120ms ease, background 120ms ease;
+}
+.code-block:hover .copy, .code-block .copy:focus-visible, .code-block .copy.copied { opacity: 1; }
+.code-block .copy:hover { background: var(--copy-hover-bg); color: var(--copy-hover-fg); }
+.code-block .copy:focus-visible { outline: 2px solid var(--link); outline-offset: 1px; }
+.code-block .copy.copied { color: var(--copy-hover-fg); }
+@media (hover: none) { .code-block .copy { opacity: 1; } }
+
 /* Syntax highlighting: highlight.js classes mapped onto theme variables.
    Never distinguish tokens by red vs green alone; themes use blue / amber /
    orange / purple plus weight and style. */
