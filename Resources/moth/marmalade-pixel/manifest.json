@@ -1,0 +1,37 @@
+{
+  "name": "Bartholomew (pixel)",
+  "type": "spritesheet",
+  "format": 1,
+  "asset": "sheet.png",
+  "frameIndex": "frames.json",
+  "frameSize": [32, 32],
+  "pixelScale": 2,
+  "size": 32,
+  "anchors": {
+    "feet": [16, 32],
+    "centre": [16, 18],
+    "eyeLeft": [12, 9],
+    "eyeRight": [18, 9],
+    "book": [16, 15]
+  },
+  "poses": {
+    "perch-idle":    { "frames": ["perch-idle"] },
+    "perch-reading": { "frames": ["perch-reading"] },
+    "page-turn":     { "frames": ["page-turn", "perch-reading"], "fps": 4 },
+    "doze":          { "frames": ["doze"] },
+    "yawn":          { "frames": ["yawn"] },
+    "wake":          { "frames": ["perch-idle"] },
+    "startled":      { "frames": ["startled"] },
+    "cling":         { "frames": ["cling"] },
+    "smooth-down":   { "frames": ["perch-idle"] },
+    "disapprove":    { "frames": ["disapprove"] },
+    "glance":        { "frames": ["perch-reading"] },
+    "nod":           { "frames": ["perch-reading"] },
+    "magnifier":     { "frames": ["magnifier"] },
+    "wave":          { "frames": ["wave"] },
+    "close-book":    { "frames": ["perch-idle"] },
+    "take-off":      { "frames": ["take-off"] },
+    "fly":           { "frames": ["fly", "fly-2"], "fps": 8 },
+    "land":          { "frames": ["land"] }
+  }
+}

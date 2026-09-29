@@ -19,11 +19,15 @@ struct LaunchOptions {
     var printDocuments = false
     var settingsPane: String?
     var aboutBox = false
+    var mothSheet: String?
+    var mothValidate: String?
+    var pack: String?
+    var poses: String?
     var dockIcon = false
     var editText: String?
     var delay: Double = 0.8
 
-    var isHeadless: Bool { snapshotInput != nil || selfTestInput != nil || settingsPane != nil || aboutBox || dockIcon }
+    var isHeadless: Bool { snapshotInput != nil || selfTestInput != nil || settingsPane != nil || aboutBox || dockIcon || mothSheet != nil || mothValidate != nil }
 
     init(arguments: [String]) {
         for argument in arguments {
@@ -33,6 +37,7 @@ struct LaunchOptions {
             if argument == "--save" { save = true; continue }
             if argument == "--print-documents" { printDocuments = true; continue }
             if argument == "--about" { aboutBox = true; continue }
+            if argument == "--moth-validate" { mothValidate = ""; continue }
             if argument == "--dock-icon" { dockIcon = true; continue }
             guard argument.hasPrefix("--"), let eq = argument.firstIndex(of: "=") else { continue }
             let key = argument[argument.index(argument.startIndex, offsetBy: 2)..<eq]
@@ -49,6 +54,10 @@ struct LaunchOptions {
             case "delay": delay = Double(value) ?? delay
             case "edit": editText = value
             case "settings-pane": settingsPane = value
+            case "moth-sheet": mothSheet = value
+            case "moth-validate": mothValidate = value
+            case "pack": pack = value
+            case "poses": poses = value
             case "size":
                 let parts = value.split(separator: "x").compactMap { Int($0) }
                 if parts.count == 2 { size = (parts[0], parts[1]) }

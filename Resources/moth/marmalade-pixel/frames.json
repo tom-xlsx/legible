@@ -1,0 +1,16 @@
+{
+  "perch-idle": 0,
+  "perch-reading": 1,
+  "page-turn": 2,
+  "doze": 3,
+  "yawn": 4,
+  "startled": 5,
+  "cling": 6,
+  "disapprove": 7,
+  "magnifier": 8,
+  "wave": 9,
+  "take-off": 10,
+  "fly": 11,
+  "fly-2": 12,
+  "land": 13
+}

@@ -6,6 +6,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var selfTestJob: SelfTestJob?
     private var settingsSnapshotJob: SettingsSnapshotJob?
     private var garnishSnapshotJob: GarnishSnapshotJob?
+    private var mothSheetJob: MothSheetJob?
     private var restoredSession = false
 
     func applicationWillFinishLaunching(_ notification: Notification) {
@@ -41,6 +42,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             job.run()
         } else if let job = GarnishSnapshotJob(options: launchOptions) {
             garnishSnapshotJob = job
+            job.run()
+        } else if let job = MothSheetJob(options: launchOptions) {
+            mothSheetJob = job
             job.run()
         }
     }

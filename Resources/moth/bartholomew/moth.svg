@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Bartholomew: a small house moth seen from above, wings folded into a tall tent.
+       Every part is a <g id="…"> listed in manifest.json with its pivot point.
+       Colours come from the moth palette tokens (see PACK-GUIDE.md). -->
+  <g id="antenna-left" fill="none" stroke="var(--moth-body)" stroke-width="1.5" stroke-linecap="round">
+    <path d="M29.5 12 C27 6, 20 2, 13 4 C10 5, 9 8, 11 9"/>
+  </g>
+  <g id="antenna-right" fill="none" stroke="var(--moth-body)" stroke-width="1.5" stroke-linecap="round">
+    <path d="M34.5 12 C37 6, 44 2, 51 4 C54 5, 55 8, 53 9"/>
+  </g>
+  <g id="arm-wave" fill="none" stroke="var(--moth-body)" stroke-width="1.6" stroke-linecap="round">
+    <path d="M37 24 C41 22, 44 19, 45 15"/>
+    <circle cx="45.5" cy="14" r="1.6" fill="var(--moth-body)" stroke="none"/>
+  </g>
+  <g id="tail" fill="var(--moth-body)">
+    <ellipse cx="32" cy="57" rx="2.4" ry="5"/>
+  </g>
+  <g id="wing-left" fill="var(--moth-wing)">
+    <path d="M32 23 L6 54 C4 57, 6 60, 10 59.5 L32 56 Z"/>
+    <path d="M23 38 L13 54" stroke="var(--moth-wing-mark)" stroke-width="1.3" stroke-linecap="round" fill="none"/>
+    <path d="M18 46 L15.5 44.5" stroke="var(--moth-wing-mark)" stroke-width="1.3" stroke-linecap="round" fill="none"/>
+  </g>
+  <g id="wing-right" fill="var(--moth-wing-shade)">
+    <path d="M32 23 L58 54 C60 57, 58 60, 54 59.5 L32 56 Z"/>
+    <path d="M41 38 L51 54" stroke="var(--moth-wing-mark)" stroke-width="1.3" stroke-linecap="round" fill="none"/>
+    <path d="M46 46 L48.5 44.5" stroke="var(--moth-wing-mark)" stroke-width="1.3" stroke-linecap="round" fill="none"/>
+  </g>
+  <g id="thorax" fill="var(--moth-body)">
+    <ellipse cx="32" cy="22" rx="5.5" ry="3.6"/>
+  </g>
+  <g id="head" fill="var(--moth-body)">
+    <circle cx="32" cy="14.5" r="6.5"/>
+  </g>
+  <g id="eyes">
+    <circle id="eye-left" cx="29" cy="15" r="2.4" fill="var(--moth-eye-white)"/>
+    <circle id="eye-right" cx="35" cy="15" r="2.4" fill="var(--moth-eye-white)"/>
+    <circle id="pupil-left" cx="29.4" cy="15.3" r="1.1" fill="var(--moth-eye)"/>
+    <circle id="pupil-right" cx="35.4" cy="15.3" r="1.1" fill="var(--moth-eye)"/>
+  </g>
+  <g id="half-lids" fill="var(--moth-body)">
+    <path d="M26.6 15 a2.4 2.4 0 0 1 4.8 0 Z"/>
+    <path d="M32.6 15 a2.4 2.4 0 0 1 4.8 0 Z"/>
+  </g>
+  <g id="lids" fill="none" stroke="var(--moth-eye)" stroke-width="1.1" stroke-linecap="round">
+    <path d="M27 15.4 C28 16.6, 30 16.6, 31 15.4"/>
+    <path d="M33 15.4 C34 16.6, 36 16.6, 37 15.4"/>
+  </g>
+  <g id="glasses" fill="none" stroke="var(--moth-glasses)" stroke-width="1.2">
+    <circle cx="29" cy="15" r="3.3"/>
+    <circle cx="35" cy="15" r="3.3"/>
+    <path d="M32.3 15 h-0.6"/>
+  </g>
+  <g id="magnifier" fill="none" stroke="var(--moth-glasses)" stroke-width="1.3" stroke-linecap="round">
+    <circle cx="40.5" cy="12" r="4" fill="var(--moth-eye-white)" fill-opacity="0.35"/>
+    <path d="M43.4 14.9 L47 18.5"/>
+  </g>
+  <g id="book-open">
+    <path d="M24.5 30 L32 32.5 L39.5 30 L39.5 24.5 L32 27 L24.5 24.5 Z" fill="var(--moth-book)"/>
+    <path d="M26.5 28.6 L32 30.6 L37.5 28.6 L37.5 25.8 L32 27.8 L26.5 25.8 Z" fill="var(--moth-page)"/>
+  </g>
+  <g id="page-flip" fill="var(--moth-page)" stroke="var(--moth-book)" stroke-width="0.6">
+    <path d="M32 27.8 L37 24 L37.5 25.8 L32 30.6 Z"/>
+  </g>
+  <g id="book-closed" fill="var(--moth-book)">
+    <rect x="26" y="25" width="12" height="5" rx="1"/>
+    <rect x="27.5" y="26.5" width="9" height="2" fill="var(--moth-page)"/>
+  </g>
+</svg>

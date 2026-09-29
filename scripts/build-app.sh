@@ -27,6 +27,7 @@ printf 'APPL????' > "$CONTENTS/PkgInfo"
 
 cp -R "$ROOT/Resources/web"    "$CONTENTS/Resources/web"
 cp -R "$ROOT/Resources/themes" "$CONTENTS/Resources/themes"
+cp -R "$ROOT/Resources/moth"   "$CONTENTS/Resources/moth"
 cp    "$ROOT/build/Legible.icns" "$CONTENTS/Resources/Legible.icns"
 cp    "$ROOT/Resources/icon/legible.svg" "$CONTENTS/Resources/legible.svg"
 mkdir -p "$CONTENTS/Resources/bin"

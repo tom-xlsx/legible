@@ -42,6 +42,7 @@ check: app test
 	rm -f build/check-settings.toml
 	python3 scripts/check-themes.py Resources/themes
 	$(APP)/Contents/MacOS/Legible --selftest=$(FIXTURE)
+	$(APP)/Contents/MacOS/Legible --moth-validate
 	$(APP)/Contents/MacOS/Legible --snapshot=$(FIXTURE) --out=build/check-oat-milk.png --theme=oat-milk
 	$(APP)/Contents/MacOS/Legible --snapshot=$(FIXTURE) --out=build/check-burnt-toast.png --theme=burnt-toast
 	@echo "check: OK"
