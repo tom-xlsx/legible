@@ -41,7 +41,7 @@ final class ThemeTests: XCTestCase {
         XCTAssertEqual(options.theme, "oat-milk")
         XCTAssertEqual(options.size?.width, 800)
         XCTAssertEqual(options.size?.height, 600)
-        XCTAssertEqual(options.scroll, 120)
+        XCTAssertEqual(options.scroll, "120")
         XCTAssertTrue(options.isHeadless)
         XCTAssertFalse(LaunchOptions(arguments: ["Legible"]).isHeadless)
     }

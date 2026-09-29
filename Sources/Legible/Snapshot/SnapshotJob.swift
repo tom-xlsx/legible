@@ -8,11 +8,12 @@ struct LaunchOptions {
     var output: String?
     var theme: String?
     var size: (width: Int, height: Int)?
-    var scroll: Int?
+    var scroll: String?
     var eval: String?
     var find: String?
     var zoom: Double?
     var captureWindow = false
+    var delay: Double = 0.8
 
     var isHeadless: Bool { snapshotInput != nil || selfTestInput != nil }
 
@@ -27,10 +28,11 @@ struct LaunchOptions {
             case "selftest": selfTestInput = value
             case "out": output = value
             case "theme": theme = value
-            case "scroll": scroll = Int(value)
+            case "scroll": scroll = value
             case "eval": eval = value
             case "find": find = value
             case "zoom": zoom = Double(value)
+            case "delay": delay = Double(value) ?? delay
             case "size":
                 let parts = value.split(separator: "x").compactMap { Int($0) }
                 if parts.count == 2 { size = (parts[0], parts[1]) }
@@ -40,8 +42,8 @@ struct LaunchOptions {
     }
 }
 
-/// `Legible --snapshot=in.md --out=out.png [--theme=id] [--size=WxH] [--scroll=Y]
-///          [--zoom=1.3] [--eval=JS] [--find=query] [--window]`
+/// `Legible --snapshot=in.md --out=out.png [--theme=id] [--size=WxH] [--scroll=Y|selector]
+///          [--zoom=1.3] [--eval=JS] [--find=query] [--window] [--delay=seconds]`
 /// Renders a document, writes a PNG of the viewport (or the whole window with
 /// --window, which includes AppKit overlays such as the find bar), and exits
 /// non-zero if the page reported any JavaScript error. Used by `make check`
@@ -85,7 +87,7 @@ final class SnapshotJob {
             let proceed = { [weak self, weak controller] in
                 guard let self, let controller else { return }
                 if let zoom = options.zoom { Zoom.level = zoom }
-                if let y = options.scroll { controller.preview.scroll(toY: y) }
+                if let scroll = options.scroll { controller.preview.scroll(to: scroll) }
                 if let js = options.eval { controller.preview.evaluate(js) { _ in } }
                 if let query = options.find {
                     controller.showFind()
@@ -93,7 +95,7 @@ final class SnapshotJob {
                     controller.findNext(backwards: false)
                 }
                 let overlays: [NSView] = self.options.captureWindow ? [controller.findBarForTesting] : []
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + self.options.delay) {
                     self.capture(controller.preview.webView, overlays: overlays)
                 }
             }

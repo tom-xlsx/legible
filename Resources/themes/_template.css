@@ -1,0 +1,102 @@
+/* Legible theme template.
+ *
+ * Copy this file, give it a name (the file name is the theme id, e.g.
+ * flat-white.css), fill in the values, and it appears in View › Theme.
+ * Files here reload live when saved. Files whose names start with "_" are
+ * ignored.
+ *
+ * Header tags (inside this first comment block):
+ *   @name         Flat White            The name shown in the menu.
+ *   @appearance   light | dark          Which group it is listed under, and
+ *                                       what it is treated as for defaults.
+ *   @description  Milky and calm.       Shown as the menu item's tooltip.
+ *   @contrast     aaa                   Optional. Declares the theme aims for
+ *                                       WCAG AAA (7:1) body text.
+ *   @focus        true                  Optional. Enables focus mode: every
+ *                                       block except the one at the reading
+ *                                       line is dimmed to --focus-dim.
+ *
+ * Guidelines the bundled themes follow:
+ *   - Low saturation. No neon, no pure white backgrounds except for
+ *     high-contrast themes.
+ *   - Body text (--fg on --bg) at least 4.5:1. Muted text, links, inline code,
+ *     code blocks and the copy button also at least 4.5:1 on their backgrounds.
+ *   - Never rely on red versus green to tell syntax tokens apart. Use blue,
+ *     amber, orange, purple, lightness, and weight or style.
+ *   Run `python3 scripts/check-themes.py <dir>` from the Legible repository
+ *   to check a theme against these rules.
+ *
+ * Every variable below is required unless marked optional.
+ */
+
+/* @name My Theme
+   @appearance light
+   @description One line about it. */
+:root {
+  /* Page */
+  --bg: #f5f2eb;              /* page background */
+  --fg: #2c2a26;              /* body text */
+  --fg-muted: #66625a;        /* secondary text: footnotes, h6, captions, strikethrough */
+  --link: #35619b;            /* links */
+  --link-hover: #244a7c;      /* links on hover */
+  --heading: #1f1d1a;         /* h1–h5 */
+  --rule: #dcd6ca;            /* horizontal rules, heading underlines, details borders */
+
+  /* Blockquotes */
+  --quote-fg: #5a564f;
+  --quote-border: #cdc6b8;    /* the bar on the left */
+  --quote-bg: #efebe2;
+
+  /* Tables */
+  --table-border: #dcd6ca;
+  --table-head-bg: #ebe7dd;
+  --table-stripe: #f0ede5;    /* every second body row */
+
+  /* Inline code and <kbd> */
+  --code-inline-fg: #4a463f;
+  --code-inline-bg: #e9e5db;
+
+  /* Code blocks */
+  --code-fg: #2c2a26;
+  --code-bg: #ece8df;
+  --code-border: #dfd9cc;
+  --code-label: #7a756c;      /* the small language label in the corner */
+
+  /* The copy button on code blocks */
+  --copy-fg: #5a564f;
+  --copy-bg: #f5f2eb;
+  --copy-border: #cdc6b8;
+  --copy-hover-bg: #e2ddd1;
+  --copy-hover-fg: #2c2a26;
+
+  /* Text selection */
+  --selection-bg: #d2deeb;
+  --selection-fg: #1f1d1a;
+
+  /* Type and measure */
+  --font-body: -apple-system, system-ui, "Helvetica Neue", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+  --font-size: 16px;          /* base size; headings and code scale from it */
+  --line-height: 1.6;
+  --measure: 76ch;            /* maximum text column width */
+
+  /* Syntax highlighting (highlight.js token groups) */
+  --hl-comment: #66615a;      /* comments, quotes */
+  --hl-keyword: #5b3fa8;      /* keywords, literals, built-ins */
+  --hl-string: #7f520c;       /* strings, regexps */
+  --hl-number: #9a4a0a;       /* numbers, symbols, bullets */
+  --hl-function: #2c5f99;     /* function and section titles, CSS selectors */
+  --hl-type: #186a72;         /* types, class names */
+  --hl-variable: #2c2a26;     /* variables, properties, parameters */
+  --hl-attr: #186a72;         /* HTML/XML attributes */
+  --hl-tag: #5b3fa8;          /* HTML/XML tag names (rendered bold like keywords) */
+  --hl-meta: #66615a;         /* preprocessor lines, decorators, shebangs */
+  --hl-punct: #5e5a53;        /* punctuation, operators */
+  --hl-addition-bg: #d9e5f3;  /* diff "+" lines (blue tint, not green) */
+  --hl-deletion-bg: #f3e2cf;  /* diff "-" lines (orange tint, not red) */
+  --hl-keyword-weight: 600;   /* font-weight for keywords and tag names */
+  --hl-comment-style: italic; /* font-style for comments: italic or normal */
+
+  /* Optional: only read when the header has "@focus true" */
+  /* --focus-dim: 0.35; */    /* opacity of blocks away from the reading line */
+}

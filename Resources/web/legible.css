@@ -239,6 +239,12 @@ summary:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; bor
 .footnote-backref { text-decoration: none; }
 sup.footnote-ref a { text-decoration: none; padding: 0 0.1em; }
 
+/* ---- Focus mode (Big Breakfast and any theme with @focus true) ------ */
+
+.focus-mode .doc > * { opacity: var(--focus-dim, 0.35); transition: opacity 180ms ease; }
+.focus-mode .doc > .focused, .focus-mode .doc > .front-matter { opacity: 1; }
+.focus-mode .doc > *:hover { opacity: 1; }
+
 /* ---- Motion -------------------------------------------------------- */
 
 html { scroll-behavior: smooth; }

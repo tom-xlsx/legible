@@ -1,0 +1,59 @@
+/* @name Sourdough
+   @appearance light
+   @description Cream paper and a serif body. Reads like a book. */
+:root {
+  --bg: #f7f1e3;
+  --fg: #2f2a24;
+  --fg-muted: #6a6255;
+  --link: #7a4a2a;
+  --link-hover: #5c351a;
+  --heading: #241f1a;
+  --rule: #e0d6c2;
+
+  --quote-fg: #5a5248;
+  --quote-border: #cfc2a8;
+  --quote-bg: #f1e9d8;
+
+  --table-border: #e0d6c2;
+  --table-head-bg: #ece3d0;
+  --table-stripe: #f2ebdc;
+
+  --code-inline-fg: #4d463e;
+  --code-inline-bg: #ece4d2;
+
+  --code-fg: #2f2a24;
+  --code-bg: #efe8d8;
+  --code-border: #e0d6c2;
+  --code-label: #7f7669;
+
+  --copy-fg: #5a5248;
+  --copy-bg: #f7f1e3;
+  --copy-border: #cfc2a8;
+  --copy-hover-bg: #e6dcc6;
+  --copy-hover-fg: #241f1a;
+
+  --selection-bg: #e8dcc0;
+  --selection-fg: #241f1a;
+
+  --font-body: Charter, "Iowan Old Style", Georgia, "Times New Roman", serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+  --font-size: 18px;
+  --line-height: 1.65;
+  --measure: 66ch;
+
+  --hl-comment: #66615a;
+  --hl-keyword: #5b3fa8;
+  --hl-string: #7a4e10;
+  --hl-number: #964410;
+  --hl-function: #2c5f99;
+  --hl-type: #186a72;
+  --hl-variable: #2f2a24;
+  --hl-attr: #186a72;
+  --hl-tag: #5b3fa8;
+  --hl-meta: #66615a;
+  --hl-punct: #5e5a53;
+  --hl-addition-bg: #dae4ee;
+  --hl-deletion-bg: #f1dfc7;
+  --hl-keyword-weight: 600;
+  --hl-comment-style: italic;
+}

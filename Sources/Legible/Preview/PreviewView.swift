@@ -68,8 +68,13 @@ final class PreviewView: NSView {
         webView.underPageBackgroundColor = color
     }
 
-    func scroll(toY y: Int) {
-        call("window.scrollTo({top: \(y), behavior: 'instant'})")
+    /// Scrolls to a pixel offset, or to the first element matching a CSS selector.
+    func scroll(to target: String) {
+        if let y = Int(target) {
+            call("window.scrollTo({top: \(y), behavior: 'instant'})")
+        } else {
+            call("document.querySelector(\(jsLiteral(target)))?.scrollIntoView({block: 'start', behavior: 'instant'})")
+        }
     }
 
     var zoom: CGFloat {

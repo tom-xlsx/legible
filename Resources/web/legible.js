@@ -298,6 +298,30 @@
     return failures;
   }
 
+  // ---- Focus mode (themes with "@focus true") ------------------------------
+  // The block crossing the reading line (about a third of the way down) is
+  // shown at full strength; everything else takes --focus-dim.
+
+  let focusFrame = 0;
+  function updateFocus() {
+    if (!document.documentElement.classList.contains('focus-mode')) return;
+    const line = window.innerHeight * 0.38;
+    let best = null, bestDistance = Infinity;
+    for (const el of root.children) {
+      const r = el.getBoundingClientRect();
+      if (r.height === 0) continue;
+      const distance = r.top <= line && r.bottom >= line ? 0 : Math.min(Math.abs(r.top - line), Math.abs(r.bottom - line));
+      if (distance < bestDistance) { best = el; bestDistance = distance; }
+    }
+    for (const el of root.querySelectorAll(':scope > .focused')) if (el !== best) el.classList.remove('focused');
+    if (best) best.classList.add('focused');
+  }
+  window.addEventListener('scroll', () => {
+    cancelAnimationFrame(focusFrame);
+    focusFrame = requestAnimationFrame(updateFocus);
+  }, { passive: true });
+  window.addEventListener('resize', updateFocus);
+
   // ---- Public API (called from Swift) ------------------------------------
 
   const Legible = {
@@ -319,6 +343,7 @@
 
       if (anchor) restoreScroll(anchor);
       else if (!preserveScroll) window.scrollTo({ top: 0, behavior: 'instant' });
+      updateFocus();
 
       whenImagesSettled().then(() => {
         post({ type: 'rendered', words: wordCount(), headings, codeBlocks: rawCode.length });
@@ -327,6 +352,9 @@
 
     setTheme(css) {
       themeStyle.textContent = css || '';
+      const focus = /@focus\s+true/i.test(css || '');
+      document.documentElement.classList.toggle('focus-mode', focus);
+      if (focus) updateFocus();
     },
 
     codeAt(index) {

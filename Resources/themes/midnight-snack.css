@@ -1,0 +1,59 @@
+/* @name Midnight Snack
+   @appearance dark
+   @description True black with dimmed text, for the small hours. */
+:root {
+  --bg: #000000;
+  --fg: #c8c4bb;
+  --fg-muted: #8a867e;
+  --link: #86a8cc;
+  --link-hover: #a0bedc;
+  --heading: #d6d2c9;
+  --rule: #2a2a2a;
+
+  --quote-fg: #a9a59d;
+  --quote-border: #3a3a3a;
+  --quote-bg: #0c0c0c;
+
+  --table-border: #2a2a2a;
+  --table-head-bg: #141414;
+  --table-stripe: #0a0a0a;
+
+  --code-inline-fg: #cfcbc2;
+  --code-inline-bg: #1a1a1a;
+
+  --code-fg: #c8c4bb;
+  --code-bg: #0e0e0e;
+  --code-border: #242424;
+  --code-label: #8a867e;
+
+  --copy-fg: #b5b1a8;
+  --copy-bg: #161616;
+  --copy-border: #333333;
+  --copy-hover-bg: #262626;
+  --copy-hover-fg: #d6d2c9;
+
+  --selection-bg: #2d3a4a;
+  --selection-fg: #d6d2c9;
+
+  --font-body: -apple-system, system-ui, "Helvetica Neue", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+  --font-size: 16px;
+  --line-height: 1.6;
+  --measure: 76ch;
+
+  --hl-comment: #837f77;
+  --hl-keyword: #b39ddb;
+  --hl-string: #cdaa66;
+  --hl-number: #d6945a;
+  --hl-function: #7aa9d8;
+  --hl-type: #6bb8bc;
+  --hl-variable: #c8c4bb;
+  --hl-attr: #6bb8bc;
+  --hl-tag: #b39ddb;
+  --hl-meta: #837f77;
+  --hl-punct: #96928a;
+  --hl-addition-bg: #1c2a3a;
+  --hl-deletion-bg: #3a2618;
+  --hl-keyword-weight: 600;
+  --hl-comment-style: italic;
+}

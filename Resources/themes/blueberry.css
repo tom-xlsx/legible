@@ -1,0 +1,59 @@
+/* @name Blueberry
+   @appearance dark
+   @description Muted slate and navy. */
+:root {
+  --bg: #262b36;
+  --fg: #d6dae3;
+  --fg-muted: #98a0ae;
+  --link: #93bbe6;
+  --link-hover: #adcdf0;
+  --heading: #e8ebf1;
+  --rule: #3c4453;
+
+  --quote-fg: #b4bbc8;
+  --quote-border: #4f5868;
+  --quote-bg: #2b313d;
+
+  --table-border: #3c4453;
+  --table-head-bg: #2f3541;
+  --table-stripe: #2a303b;
+
+  --code-inline-fg: #dde1e9;
+  --code-inline-bg: #343b48;
+
+  --code-fg: #d6dae3;
+  --code-bg: #1f242d;
+  --code-border: #343b48;
+  --code-label: #98a0ae;
+
+  --copy-fg: #c3c9d4;
+  --copy-bg: #2f3541;
+  --copy-border: #4f5868;
+  --copy-hover-bg: #3c4453;
+  --copy-hover-fg: #e8ebf1;
+
+  --selection-bg: #3b4d6b;
+  --selection-fg: #e8ebf1;
+
+  --font-body: -apple-system, system-ui, "Helvetica Neue", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+  --font-size: 16px;
+  --line-height: 1.6;
+  --measure: 76ch;
+
+  --hl-comment: #8b93a1;
+  --hl-keyword: #c0a8ec;
+  --hl-string: #d9b872;
+  --hl-number: #e4a068;
+  --hl-function: #86b8ea;
+  --hl-type: #78c6cc;
+  --hl-variable: #d6dae3;
+  --hl-attr: #78c6cc;
+  --hl-tag: #c0a8ec;
+  --hl-meta: #8b93a1;
+  --hl-punct: #9aa2b0;
+  --hl-addition-bg: #2b3d55;
+  --hl-deletion-bg: #4b3a2c;
+  --hl-keyword-weight: 600;
+  --hl-comment-style: italic;
+}

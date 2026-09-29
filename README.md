@@ -55,7 +55,7 @@ A theme is a header comment plus a `:root` block:
 }
 ```
 
-`@appearance` (`light` or `dark`) decides which group the theme is listed under. Keep body text at WCAG AA contrast or better, and don't rely on red versus green to tell syntax tokens apart.
+`@appearance` (`light` or `dark`) decides which group the theme is listed under. `@contrast aaa` declares a high-contrast theme, and `@focus true` with a `--focus-dim` value turns on focus mode (only the block at the reading line is shown at full strength). A user theme with the same file name as a bundled one replaces it. View › Theme › Show User Themes Folder opens the folder; hovering a theme in that menu previews it live, and ⌘⇧T cycles through them. Keep body text at WCAG AA contrast or better, and don't rely on red versus green to tell syntax tokens apart.
 
 ## Rendering notes
 

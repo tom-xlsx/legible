@@ -51,7 +51,8 @@ snapshots: app
 	  id=$$(basename $$f .css); [ "$$id" = "_template" ] && continue; \
 	  $(APP)/Contents/MacOS/Legible --snapshot=$(FIXTURE) --out=build/snapshots/$$id.png --theme=$$id || exit 1; \
 	done
-	@echo "Snapshots in build/snapshots/"
+	swift scripts/contact-sheet.swift build/snapshots/all.png --columns 4 --width 420 build/snapshots/*.png
+	@echo "Snapshots in build/snapshots/ (all.png is the contact sheet)"
 
 ## Tag a release (annotated; opens your editor for the notes), then build and install.
 release:

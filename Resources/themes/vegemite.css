@@ -1,0 +1,60 @@
+/* @name Vegemite
+   @appearance dark
+   @contrast aaa
+   @description High contrast dark. Meets AAA. */
+:root {
+  --bg: #101010;
+  --fg: #f2efe8;
+  --fg-muted: #b8b3a8;
+  --link: #9ec5f0;
+  --link-hover: #bcd8f7;
+  --heading: #ffffff;
+  --rule: #4a4a4a;
+
+  --quote-fg: #e0dbd0;
+  --quote-border: #8a8a8a;
+  --quote-bg: #1a1a1a;
+
+  --table-border: #6a6a6a;
+  --table-head-bg: #222222;
+  --table-stripe: #181818;
+
+  --code-inline-fg: #f2efe8;
+  --code-inline-bg: #262626;
+
+  --code-fg: #f2efe8;
+  --code-bg: #1a1a1a;
+  --code-border: #5a5a5a;
+  --code-label: #b8b3a8;
+
+  --copy-fg: #e0dbd0;
+  --copy-bg: #262626;
+  --copy-border: #7a7a7a;
+  --copy-hover-bg: #3a3a3a;
+  --copy-hover-fg: #ffffff;
+
+  --selection-bg: #3f5d85;
+  --selection-fg: #ffffff;
+
+  --font-body: -apple-system, system-ui, "Helvetica Neue", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+  --font-size: 16px;
+  --line-height: 1.6;
+  --measure: 76ch;
+
+  --hl-comment: #b0aba0;
+  --hl-keyword: #d4c2f5;
+  --hl-string: #f0cf84;
+  --hl-number: #f5b283;
+  --hl-function: #9ec5f0;
+  --hl-type: #8fe0dc;
+  --hl-variable: #f2efe8;
+  --hl-attr: #8fe0dc;
+  --hl-tag: #d4c2f5;
+  --hl-meta: #b0aba0;
+  --hl-punct: #cfcac0;
+  --hl-addition-bg: #223a58;
+  --hl-deletion-bg: #5a3a22;
+  --hl-keyword-weight: 600;
+  --hl-comment-style: italic;
+}

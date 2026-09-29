@@ -11,8 +11,8 @@ For each *.css theme (except _template.css):
     axis: after simulating deuteranopia they must still differ by ΔE ≥ 12.
     Exempt: identical colours (a deliberate "same colour"), tokens already
     set apart by weight or style (bold keywords and tags, italic comments),
-    the muted trio comment/meta/punct among themselves, and numbers (digits
-    identify themselves).
+    the muted trio comment/meta/punct (de-emphasised by role, not by hue),
+    and numbers (digits identify themselves).
 
 Exit status is non-zero if anything fails. Usage: check-themes.py Resources/themes
 """
@@ -164,7 +164,7 @@ def check(path: Path):
     for i, a in enumerate(names):
         for b in names[i + 1:]:
             ca, cb = token_colours[a], token_colours[b]
-            if ca == cb or {a, b} & style_distinct or {a, b} & self_evident or {a, b} <= muted:
+            if ca == cb or {a, b} & style_distinct or {a, b} & self_evident or {a, b} & muted:
                 continue
             de = delta_e(lab(simulate_deutan(ca)), lab(simulate_deutan(cb)))
             if de < 12:

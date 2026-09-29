@@ -1,0 +1,60 @@
+/* @name Salt & Pepper
+   @appearance light
+   @contrast aaa
+   @description High contrast light. Meets AAA. */
+:root {
+  --bg: #ffffff;
+  --fg: #111111;
+  --fg-muted: #4a4a4a;
+  --link: #0b4a8f;
+  --link-hover: #072f5c;
+  --heading: #000000;
+  --rule: #bcbcbc;
+
+  --quote-fg: #222222;
+  --quote-border: #555555;
+  --quote-bg: #f2f2f2;
+
+  --table-border: #8a8a8a;
+  --table-head-bg: #e8e8e8;
+  --table-stripe: #f4f4f4;
+
+  --code-inline-fg: #111111;
+  --code-inline-bg: #ededed;
+
+  --code-fg: #111111;
+  --code-bg: #f3f3f3;
+  --code-border: #9a9a9a;
+  --code-label: #555555;
+
+  --copy-fg: #222222;
+  --copy-bg: #ffffff;
+  --copy-border: #555555;
+  --copy-hover-bg: #e0e0e0;
+  --copy-hover-fg: #000000;
+
+  --selection-bg: #b8d3f2;
+  --selection-fg: #000000;
+
+  --font-body: -apple-system, system-ui, "Helvetica Neue", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+  --font-size: 16px;
+  --line-height: 1.6;
+  --measure: 76ch;
+
+  --hl-comment: #4a4a4a;
+  --hl-keyword: #3d1f8a;
+  --hl-string: #6b3d00;
+  --hl-number: #7a3300;
+  --hl-function: #0b4a8f;
+  --hl-type: #00554f;
+  --hl-variable: #111111;
+  --hl-attr: #00554f;
+  --hl-tag: #3d1f8a;
+  --hl-meta: #4a4a4a;
+  --hl-punct: #333333;
+  --hl-addition-bg: #cfe1f7;
+  --hl-deletion-bg: #f7dcc2;
+  --hl-keyword-weight: 600;
+  --hl-comment-style: italic;
+}

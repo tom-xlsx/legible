@@ -1,0 +1,59 @@
+/* @name Espresso
+   @appearance dark
+   @description Warm brown. Dark without going cold. */
+:root {
+  --bg: #2e2622;
+  --fg: #e2d6c8;
+  --fg-muted: #a3968a;
+  --link: #d9a86c;
+  --link-hover: #e8bd88;
+  --heading: #f0e6d8;
+  --rule: #4d4038;
+
+  --quote-fg: #c4b6a6;
+  --quote-border: #64534a;
+  --quote-bg: #352c27;
+
+  --table-border: #4d4038;
+  --table-head-bg: #3a302b;
+  --table-stripe: #332a25;
+
+  --code-inline-fg: #e6dccd;
+  --code-inline-bg: #40352f;
+
+  --code-fg: #e2d6c8;
+  --code-bg: #241d1a;
+  --code-border: #40352f;
+  --code-label: #a3968a;
+
+  --copy-fg: #cabdaf;
+  --copy-bg: #3a302b;
+  --copy-border: #5c4d44;
+  --copy-hover-bg: #4d4038;
+  --copy-hover-fg: #f0e6d8;
+
+  --selection-bg: #5a4636;
+  --selection-fg: #f0e6d8;
+
+  --font-body: -apple-system, system-ui, "Helvetica Neue", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+  --font-size: 16px;
+  --line-height: 1.6;
+  --measure: 76ch;
+
+  --hl-comment: #988b7d;
+  --hl-keyword: #c6a9ea;
+  --hl-string: #dbb46e;
+  --hl-number: #e69a5e;
+  --hl-function: #86b6e8;
+  --hl-type: #74c6c4;
+  --hl-variable: #e2d6c8;
+  --hl-attr: #74c6c4;
+  --hl-tag: #c6a9ea;
+  --hl-meta: #988b7d;
+  --hl-punct: #a89b8e;
+  --hl-addition-bg: #2f3f52;
+  --hl-deletion-bg: #4f3524;
+  --hl-keyword-weight: 600;
+  --hl-comment-style: italic;
+}

@@ -1,0 +1,59 @@
+/* @name Earl Grey
+   @appearance light
+   @description Cool blue-grey. Quiet and a little formal. */
+:root {
+  --bg: #eef0f3;
+  --fg: #2a2e35;
+  --fg-muted: #5e6672;
+  --link: #35619b;
+  --link-hover: #244a7c;
+  --heading: #1e2229;
+  --rule: #d3d8df;
+
+  --quote-fg: #4f5560;
+  --quote-border: #b9c1cc;
+  --quote-bg: #e6e9ee;
+
+  --table-border: #d3d8df;
+  --table-head-bg: #e2e6eb;
+  --table-stripe: #e8ebef;
+
+  --code-inline-fg: #3f4550;
+  --code-inline-bg: #e0e4ea;
+
+  --code-fg: #2a2e35;
+  --code-bg: #e4e7ec;
+  --code-border: #d3d8df;
+  --code-label: #6f7783;
+
+  --copy-fg: #4f5560;
+  --copy-bg: #eef0f3;
+  --copy-border: #b9c1cc;
+  --copy-hover-bg: #d8dde4;
+  --copy-hover-fg: #1e2229;
+
+  --selection-bg: #cdd9ea;
+  --selection-fg: #1e2229;
+
+  --font-body: -apple-system, system-ui, "Helvetica Neue", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+  --font-size: 16px;
+  --line-height: 1.6;
+  --measure: 76ch;
+
+  --hl-comment: #5f656f;
+  --hl-keyword: #5a3fa6;
+  --hl-string: #7d500e;
+  --hl-number: #9a4a0a;
+  --hl-function: #2a5c95;
+  --hl-type: #17696f;
+  --hl-variable: #2a2e35;
+  --hl-attr: #17696f;
+  --hl-tag: #5a3fa6;
+  --hl-meta: #5f656f;
+  --hl-punct: #585e68;
+  --hl-addition-bg: #d3dfee;
+  --hl-deletion-bg: #eedfcd;
+  --hl-keyword-weight: 600;
+  --hl-comment-style: italic;
+}

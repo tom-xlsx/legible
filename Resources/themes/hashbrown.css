@@ -1,0 +1,59 @@
+/* @name Hashbrown
+   @appearance light
+   @description Warm sepia, like the paper in an old cookbook. */
+:root {
+  --bg: #f3ead9;
+  --fg: #3d3126;
+  --fg-muted: #75654f;
+  --link: #7d4f14;
+  --link-hover: #5f3a0c;
+  --heading: #2e241a;
+  --rule: #dccbb0;
+
+  --quote-fg: #6a5a48;
+  --quote-border: #c9b493;
+  --quote-bg: #ede2cd;
+
+  --table-border: #dccbb0;
+  --table-head-bg: #e9dcc3;
+  --table-stripe: #eee4d1;
+
+  --code-inline-fg: #5a4632;
+  --code-inline-bg: #e8dcc4;
+
+  --code-fg: #3d3126;
+  --code-bg: #ebe0c9;
+  --code-border: #dccbb0;
+  --code-label: #7d6d59;
+
+  --copy-fg: #6a5a48;
+  --copy-bg: #f3ead9;
+  --copy-border: #c9b493;
+  --copy-hover-bg: #e2d4b8;
+  --copy-hover-fg: #2e241a;
+
+  --selection-bg: #e4cfa8;
+  --selection-fg: #2e241a;
+
+  --font-body: -apple-system, system-ui, "Helvetica Neue", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+  --font-size: 16px;
+  --line-height: 1.6;
+  --measure: 76ch;
+
+  --hl-comment: #6b5c4e;
+  --hl-keyword: #6b3fa0;
+  --hl-string: #7a4a0e;
+  --hl-number: #944211;
+  --hl-function: #2b5d8f;
+  --hl-type: #1a6b6b;
+  --hl-variable: #3d3126;
+  --hl-attr: #1a6b6b;
+  --hl-tag: #6b3fa0;
+  --hl-meta: #6b5c4e;
+  --hl-punct: #64564a;
+  --hl-addition-bg: #d6dfe8;
+  --hl-deletion-bg: #ecd5b8;
+  --hl-keyword-weight: 600;
+  --hl-comment-style: italic;
+}

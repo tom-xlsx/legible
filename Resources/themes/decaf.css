@@ -1,0 +1,59 @@
+/* @name Decaf
+   @appearance dark
+   @description Deliberately low contrast for tired eyes. Still passes AA. */
+:root {
+  --bg: #34322f;
+  --fg: #bdb7ab;
+  --fg-muted: #a29c91;
+  --link: #9ab0c6;
+  --link-hover: #aec2d6;
+  --heading: #c9c3b7;
+  --rule: #494641;
+
+  --quote-fg: #a8a297;
+  --quote-border: #5a5650;
+  --quote-bg: #383633;
+
+  --table-border: #494641;
+  --table-head-bg: #3c3a36;
+  --table-stripe: #373532;
+
+  --code-inline-fg: #c1bbaf;
+  --code-inline-bg: #403d39;
+
+  --code-fg: #bdb7ab;
+  --code-bg: #2e2c29;
+  --code-border: #403d39;
+  --code-label: #a29c91;
+
+  --copy-fg: #b0aa9e;
+  --copy-bg: #3c3a36;
+  --copy-border: #55524c;
+  --copy-hover-bg: #494641;
+  --copy-hover-fg: #c9c3b7;
+
+  --selection-bg: #46515c;
+  --selection-fg: #c9c3b7;
+
+  --font-body: -apple-system, system-ui, "Helvetica Neue", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+  --font-size: 16px;
+  --line-height: 1.6;
+  --measure: 76ch;
+
+  --hl-comment: #9f998e;
+  --hl-keyword: #b4a3d6;
+  --hl-string: #c4a96f;
+  --hl-number: #cf9a6a;
+  --hl-function: #8fb0d0;
+  --hl-type: #86b8b6;
+  --hl-variable: #bdb7ab;
+  --hl-attr: #86b8b6;
+  --hl-tag: #b4a3d6;
+  --hl-meta: #9f998e;
+  --hl-punct: #a8a297;
+  --hl-addition-bg: #35414d;
+  --hl-deletion-bg: #4a3a2e;
+  --hl-keyword-weight: 600;
+  --hl-comment-style: italic;
+}

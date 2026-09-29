@@ -1,0 +1,59 @@
+/* @name Marmalade
+   @appearance dark
+   @description Amber phosphor on a dark tube. Monospace everything. */
+:root {
+  --bg: #1d1610;
+  --fg: #e0a45a;
+  --fg-muted: #a67c46;
+  --link: #f0c070;
+  --link-hover: #f7d38f;
+  --heading: #f2b866;
+  --rule: #4a3620;
+
+  --quote-fg: #c99a58;
+  --quote-border: #6b4e2a;
+  --quote-bg: #241b13;
+
+  --table-border: #4a3620;
+  --table-head-bg: #2a2016;
+  --table-stripe: #211912;
+
+  --code-inline-fg: #e6b06a;
+  --code-inline-bg: #2c2218;
+
+  --code-fg: #e0a45a;
+  --code-bg: #15100b;
+  --code-border: #3a2b1b;
+  --code-label: #a67c46;
+
+  --copy-fg: #d09a52;
+  --copy-bg: #2a2016;
+  --copy-border: #6b4e2a;
+  --copy-hover-bg: #3d2d1c;
+  --copy-hover-fg: #f2b866;
+
+  --selection-bg: #5c4020;
+  --selection-fg: #fbe3b8;
+
+  --font-body: ui-monospace, "SF Mono", Menlo, monospace;
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+  --font-size: 15px;
+  --line-height: 1.55;
+  --measure: 84ch;
+
+  --hl-comment: #a07a46;
+  --hl-keyword: #f5c97a;
+  --hl-string: #fff0d0;
+  --hl-number: #f0b45a;
+  --hl-function: #ffc85c;
+  --hl-type: #ffc85c;
+  --hl-variable: #e0a45a;
+  --hl-attr: #fff0d0;
+  --hl-tag: #f5c97a;
+  --hl-meta: #a07a46;
+  --hl-punct: #a07a46;
+  --hl-addition-bg: #2e3a1e;
+  --hl-deletion-bg: #4a2a14;
+  --hl-keyword-weight: 600;
+  --hl-comment-style: italic;
+}

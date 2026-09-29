@@ -1,0 +1,59 @@
+/* @name Matcha
+   @appearance light
+   @description Faint sage, deliberately soft. Still passes AA. */
+:root {
+  --bg: #eef0e6;
+  --fg: #474c43;
+  --fg-muted: #646a5e;
+  --link: #4a6b7a;
+  --link-hover: #365461;
+  --heading: #3a3f36;
+  --rule: #d5d9cb;
+
+  --quote-fg: #5d635a;
+  --quote-border: #bcc4b0;
+  --quote-bg: #e6e9dd;
+
+  --table-border: #d5d9cb;
+  --table-head-bg: #e3e6da;
+  --table-stripe: #e8ebe0;
+
+  --code-inline-fg: #4a4f46;
+  --code-inline-bg: #e1e5d7;
+
+  --code-fg: #474c43;
+  --code-bg: #e4e7db;
+  --code-border: #d5d9cb;
+  --code-label: #787e72;
+
+  --copy-fg: #5d635a;
+  --copy-bg: #eef0e6;
+  --copy-border: #bcc4b0;
+  --copy-hover-bg: #d9ded0;
+  --copy-hover-fg: #3a3f36;
+
+  --selection-bg: #d3ddc9;
+  --selection-fg: #3a3f36;
+
+  --font-body: -apple-system, system-ui, "Helvetica Neue", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+  --font-size: 16px;
+  --line-height: 1.6;
+  --measure: 76ch;
+
+  --hl-comment: #5e645c;
+  --hl-keyword: #5f4a9e;
+  --hl-string: #7c5418;
+  --hl-number: #94500f;
+  --hl-function: #34608f;
+  --hl-type: #2a6a6a;
+  --hl-variable: #474c43;
+  --hl-attr: #2a6a6a;
+  --hl-tag: #5f4a9e;
+  --hl-meta: #5e645c;
+  --hl-punct: #5a6058;
+  --hl-addition-bg: #d7e1e7;
+  --hl-deletion-bg: #ece0cd;
+  --hl-keyword-weight: 600;
+  --hl-comment-style: italic;
+}
