@@ -6,7 +6,7 @@ FIXTURE  := fixtures/kitchen-sink.md
 # Checks and snapshots run against a throwaway settings file, never yours.
 export LEGIBLE_SETTINGS := $(CURDIR)/build/check-settings.toml
 
-.PHONY: all build app icon install check test snapshots release clean
+.PHONY: all build app app-debug icon install check test snapshots release clean
 
 all: app
 
@@ -17,6 +17,10 @@ build:
 ## Assemble and ad-hoc sign build/Legible.app.
 app: icon
 	scripts/build-app.sh
+
+## Debug build with the hidden Moth menu, at build/debug/Legible.app.
+app-debug: icon
+	CONFIG=debug scripts/build-app.sh
 
 ## Render the app icon from Resources/icon/legible.svg.
 icon: $(ICNS)
@@ -43,6 +47,7 @@ check: app test
 	python3 scripts/check-themes.py Resources/themes
 	$(APP)/Contents/MacOS/Legible --selftest=$(FIXTURE)
 	$(APP)/Contents/MacOS/Legible --moth-validate
+	$(APP)/Contents/MacOS/Legible --moth-selftest=$(FIXTURE)
 	$(APP)/Contents/MacOS/Legible --snapshot=$(FIXTURE) --out=build/check-oat-milk.png --theme=oat-milk
 	$(APP)/Contents/MacOS/Legible --snapshot=$(FIXTURE) --out=build/check-burnt-toast.png --theme=burnt-toast
 	@echo "check: OK"

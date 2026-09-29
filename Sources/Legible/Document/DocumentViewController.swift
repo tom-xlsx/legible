@@ -8,6 +8,7 @@ final class DocumentViewController: NSViewController {
     let preview: PreviewView
     let editor = EditorView(frame: .zero)
     let toc = TOCModel()
+    private(set) lazy var moth = MothController(document: document)
 
     private let tocView: NSHostingView<TOCView>
     private let split = NSSplitViewController()
@@ -45,6 +46,7 @@ final class DocumentViewController: NSViewController {
     required init?(coder: NSCoder) { fatalError("not supported") }
 
     deinit {
+        moth.flush(readingLine: lastTopLine)
         DocumentRegistry.shared.unregister(token)
         observers.forEach(NotificationCenter.default.removeObserver)
     }
@@ -112,6 +114,7 @@ final class DocumentViewController: NSViewController {
             pending?()
             onRendered?(info)
         }
+        preview.onMothMessage = { [weak self] message in self?.moth.handle(message: message) }
         preview.onScroll = { [weak self] info in
             guard let self else { return }
             lastTopLine = info.line
@@ -133,6 +136,9 @@ final class DocumentViewController: NSViewController {
         observers.append(center.addObserver(forName: SettingsStore.didChange, object: nil, queue: .main) { [weak self] _ in
             self?.applySettings()
         })
+        observers.append(center.addObserver(forName: PreviewView.externalLinkOpened, object: preview, queue: .main) { [weak self] _ in
+            self?.preview.mothEvent("external-link")
+        })
         applySettings()
 
         findBar.onQueryChange = { [weak self] query in self?.find(query, backwards: false) }
@@ -151,6 +157,11 @@ final class DocumentViewController: NSViewController {
         editor.apply(theme: theme)
         toc.apply(theme: theme)
         view.window?.backgroundColor = theme.backgroundColor
+        if hasRendered {
+            var garnish = Garnish.pageConfiguration
+            garnish["moth"] = moth.configuration(theme: theme)
+            preview.configure(garnish: garnish)
+        }
     }
 
     private var showingSettingsError = false
@@ -166,13 +177,19 @@ final class DocumentViewController: NSViewController {
         if s.measure > 0 { css += " --measure: \(s.measure)ch;" }
         css += " }"
         preview.setOverrides(css: css)
-        preview.configure(garnish: Garnish.pageConfiguration)
+        var garnish = Garnish.pageConfiguration
+        garnish["moth"] = moth.configuration(theme: ThemeManager.shared.effective)
+        preview.configure(garnish: garnish)
         editor.apply(settings: s)
         view.window?.subtitle = s.showReadingTime && hasRendered ? ReadingTime.label(words: wordCount) : ""
 
         if let error = store.fileError {
             showingSettingsError = true
             noticeBar.show(error, actions: [.init(title: "Reveal File", handler: { store.revealFile() })])
+            view.needsLayout = true
+        } else if let problem = moth.packProblem {
+            showingSettingsError = true
+            noticeBar.show(problem, actions: [.init(title: "Show Folder", handler: { NSWorkspace.shared.activateFileViewerSelecting([MothPack.userDirectory]) })])
             view.needsLayout = true
         } else if showingSettingsError {
             showingSettingsError = false
@@ -194,6 +211,8 @@ final class DocumentViewController: NSViewController {
     /// Called by the document when its text was replaced from disk.
     func documentTextDidChangeExternally() {
         noticeBar.hide()
+        MothController.reloadPack()
+        preview.mothEvent("reload")
         if isEditorVisible {
             let line = editor.topLine
             editor.text = document.text
@@ -233,6 +252,7 @@ final class DocumentViewController: NSViewController {
         editor.scroll(toLine: 0)
         view.window?.makeFirstResponder(editor.textView)
         view.window?.toolbar?.validateVisibleItems()
+        preview.mothEvent("editor-open")
     }
 
     func hideEditor() {
@@ -241,6 +261,7 @@ final class DocumentViewController: NSViewController {
         editorItem.isCollapsed = true
         view.window?.makeFirstResponder(preview.webView)
         view.window?.toolbar?.validateVisibleItems()
+        preview.mothEvent("editor-close")
     }
 
     func toggleTOC() {
@@ -306,11 +327,13 @@ final class DocumentViewController: NSViewController {
     var hasFindQuery: Bool { !findBar.query.isEmpty }
 
     func showFind() {
+        if findBar.isHidden { preview.mothEvent("find-open") }
         findBar.isHidden = false
         findBar.focus()
     }
 
     func hideFind() {
+        if !findBar.isHidden { preview.mothEvent("find-close") }
         findBar.isHidden = true
         view.window?.makeFirstResponder(preview.webView)
     }

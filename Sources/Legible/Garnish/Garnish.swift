@@ -63,7 +63,6 @@ enum Garnish {
     /// What the preview page needs to know.
     static var pageConfiguration: [String: Any] {
         [
-            "mascot": mascot,
             "ornament": ornament,
             "copyMessages": copyMessages ? copyTexts : ["Copied."],
             "emptyStates": deadpan ? emptyStates : [plainEmptyState],

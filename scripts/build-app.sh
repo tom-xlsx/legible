@@ -6,17 +6,18 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
-APP="$ROOT/build/Legible.app"
+CONFIG="${CONFIG:-release}"
+if [ "$CONFIG" = "debug" ]; then APP="$ROOT/build/debug/Legible.app"; else APP="$ROOT/build/Legible.app"; fi
 CONTENTS="$APP/Contents"
 
 eval "$("$ROOT/scripts/version.sh")"   # sets VERSION, BUILD, DESCRIPTION
 echo "Building Legible $DESCRIPTION"
 
-swift build -c release --arch arm64 -Xswiftc -warnings-as-errors
-BIN="$(swift build -c release --arch arm64 --show-bin-path)/Legible"
+swift build -c "$CONFIG" --arch arm64 -Xswiftc -warnings-as-errors
+BIN="$(swift build -c "$CONFIG" --arch arm64 --show-bin-path)/Legible"
 
 rm -rf "$APP"
-mkdir -p "$CONTENTS/MacOS" "$CONTENTS/Resources"
+mkdir -p "$(dirname "$APP")" "$CONTENTS/MacOS" "$CONTENTS/Resources"
 cp "$BIN" "$CONTENTS/MacOS/Legible"
 
 sed -e "s|@VERSION@|$VERSION|" \

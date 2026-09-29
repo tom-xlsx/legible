@@ -21,6 +21,9 @@ final class PreviewView: NSView {
     }
     /// Reported as the user scrolls: top source line, heading being read, whether the end is in view.
     var onScroll: ((ScrollInfo) -> Void)?
+    /// Messages from the moth (perch, nibble…).
+    var onMothMessage: (([String: Any]) -> Void)?
+    static let externalLinkOpened = Notification.Name("LegibleExternalLinkOpened")
 
     /// Navigations the page attempted that were not the page itself (self-test counts these).
     private(set) var blockedNavigations = 0
@@ -73,6 +76,10 @@ final class PreviewView: NSView {
 
     func configure(garnish: [String: Any]) {
         call("Legible.configure(\(jsLiteral(["garnish": garnish])))")
+    }
+
+    func mothEvent(_ name: String) {
+        call("if (window.LegibleMoth) LegibleMoth.event(\(jsLiteral(name)))")
     }
 
     /// CSS applied after the theme (font and measure settings).
@@ -181,6 +188,8 @@ final class PreviewView: NSView {
             if let line = message["line"] as? Double {
                 onScroll?(ScrollInfo(line: line, headingID: message["heading"] as? String, atEnd: message["atEnd"] as? Bool ?? false))
             }
+        case "moth":
+            onMothMessage?(message)
         case "copy":
             let pasteboard = NSPasteboard.general
             pasteboard.clearContents()
@@ -224,6 +233,9 @@ extension PreviewView: WKNavigationDelegate {
             return
         }
         LinkOpener.open(url)
+        if ["http", "https", "mailto"].contains(url.scheme ?? "") {
+            NotificationCenter.default.post(name: Self.externalLinkOpened, object: self)
+        }
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {

@@ -79,6 +79,10 @@ enum MainMenu {
         main.item("Window", nil).submenu = window
         NSApp.windowsMenu = window
 
+        #if DEBUG
+        main.addItem(MothDebugMenu.build())
+        #endif
+
         // Help
         let help = NSMenu(title: "Help")
         main.item("Help", nil).submenu = help

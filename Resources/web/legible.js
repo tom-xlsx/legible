@@ -301,7 +301,7 @@
     assert(root.querySelector('.code-block[data-lang="mermaid"]'), 'mermaid fence is not a plain code block');
 
     if (!state.garnish) {
-      assert(!document.getElementById('moth'), 'moth present while the garnish is held');
+      assert(!document.querySelector('.moth, .moth-mark, .moth-evidence'), 'moth present while the garnish is held');
       assert(!root.querySelector('.ornament'), 'ornament present while the garnish is held');
     }
     const ids = [...root.querySelectorAll('h1, h2, h3, h4, h5, h6')].map((h) => h.id);
@@ -480,7 +480,7 @@
       state.emptyStates = Array.isArray(garnish.emptyStates) && garnish.emptyStates.length ? garnish.emptyStates : ['This file is empty.'];
       const empty = root.querySelector('.empty-state');
       if (empty) empty.textContent = state.emptyStates[0];
-      state.garnish = garnish.mascot || garnish.ornament ? garnish : null;
+      state.garnish = (garnish.moth && garnish.moth.enabled) || garnish.ornament ? garnish : null;
       if (window.LegibleGarnish) window.LegibleGarnish.configure(garnish);
     },
 

@@ -38,6 +38,7 @@ struct Settings: Equatable {
     var garnishDeadpan = true
     var garnishOrnament = true
     var garnishDockIcon = true
+    var garnishHousetrained = false
 }
 
 /// Describes one key in settings.toml: where it lives, how to read and write it, and its comment.
@@ -131,6 +132,7 @@ extension Settings {
         .bool("garnish", "deadpan", \.garnishDeadpan, ""),
         .bool("garnish", "end_ornament", \.garnishOrnament, ""),
         .bool("garnish", "dock_icon", \.garnishDockIcon, ""),
+        .bool("garnish", "housetrained", \.garnishHousetrained, ""),
     ]
 
     /// Reads settings out of a parsed document; unknown keys are ignored and

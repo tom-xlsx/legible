@@ -23,11 +23,14 @@ struct LaunchOptions {
     var mothValidate: String?
     var pack: String?
     var poses: String?
+    var mothState: String?
+    var seed: UInt32?
+    var mothSelfTestInput: String?
     var dockIcon = false
     var editText: String?
     var delay: Double = 0.8
 
-    var isHeadless: Bool { snapshotInput != nil || selfTestInput != nil || settingsPane != nil || aboutBox || dockIcon || mothSheet != nil || mothValidate != nil }
+    var isHeadless: Bool { snapshotInput != nil || selfTestInput != nil || settingsPane != nil || aboutBox || dockIcon || mothSheet != nil || mothValidate != nil || mothSelfTestInput != nil }
 
     init(arguments: [String]) {
         for argument in arguments {
@@ -58,6 +61,9 @@ struct LaunchOptions {
             case "moth-validate": mothValidate = value
             case "pack": pack = value
             case "poses": poses = value
+            case "moth-state": mothState = value
+            case "seed": seed = UInt32(value)
+            case "moth-selftest": mothSelfTestInput = value
             case "size":
                 let parts = value.split(separator: "x").compactMap { Int($0) }
                 if parts.count == 2 { size = (parts[0], parts[1]) }
@@ -68,7 +74,7 @@ struct LaunchOptions {
 }
 
 /// `Legible --snapshot=in.md --out=out.png [--theme=id] [--size=WxH] [--scroll=Y|selector]
-///          [--zoom=1.3] [--eval=JS] [--find=query] [--window] [--delay=seconds] [--editor] [--edit=text] [--save] [--toc]`
+///          [--zoom=1.3] [--eval=JS] [--find=query] [--window] [--delay=seconds] [--editor] [--edit=text] [--save] [--toc] [--moth-state=pose] [--seed=N]`
 /// --editor opens the editor pane; --edit appends text to it (and implies --editor).
 /// Renders a document, writes a PNG of the viewport (or the whole window with
 /// --window, which includes AppKit overlays such as the find bar), and exits
@@ -88,6 +94,8 @@ final class SnapshotJob {
     }
 
     func run() {
+        if let seed = options.seed { MothController.seedOverride = seed }
+        if options.mothState != nil { MothController.forceEnabled = true }
         if let themeID = options.theme {
             guard ThemeManager.shared.theme(themeID) != nil else {
                 fail("unknown theme '\(themeID)'; available: \(ThemeManager.shared.themes.map(\.id).joined(separator: ", "))")
@@ -133,6 +141,11 @@ final class SnapshotJob {
                 if let scroll = options.scroll {
                     // Wait out the render's own scroll and the sync feedback guard first, as a person would.
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { controller.preview.scroll(to: scroll) }
+                }
+                if let pose = options.mothState {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) {   // after any --scroll
+                        controller.preview.evaluate("LegibleMoth.debug.place(); LegibleMoth.debug.force(\(jsString(pose)))") { _ in }
+                    }
                 }
                 if let js = options.eval { controller.preview.evaluate(js) { _ in } }
                 if let query = options.find {
@@ -272,4 +285,10 @@ final class GarnishSnapshotJob {
             exit(0)
         }
     }
+}
+
+
+private func jsString(_ s: String) -> String {
+    let data = (try? JSONSerialization.data(withJSONObject: s, options: [.fragmentsAllowed])) ?? Data("\"\"".utf8)
+    return String(decoding: data, as: UTF8.self)
 }

@@ -7,6 +7,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var settingsSnapshotJob: SettingsSnapshotJob?
     private var garnishSnapshotJob: GarnishSnapshotJob?
     private var mothSheetJob: MothSheetJob?
+    private var mothSelfTestJob: MothSelfTestJob?
     private var restoredSession = false
 
     func applicationWillFinishLaunching(_ notification: Notification) {
@@ -46,6 +47,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         } else if let job = MothSheetJob(options: launchOptions) {
             mothSheetJob = job
             job.run()
+        } else if let job = MothSelfTestJob(options: launchOptions) {
+            mothSelfTestJob = job
+            job.run()
         }
     }
 
@@ -53,6 +57,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     // the document controller run its usual unsaved-changes review.
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         Session.record()
+        MothBookmarks.shared.save()
         NSDocumentController.shared.reviewUnsavedDocuments(
             withAlertTitle: nil, cancellable: true, delegate: self,
             didReviewAllSelector: #selector(documentController(_:didReviewAll:contextInfo:)), contextInfo: nil)

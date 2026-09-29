@@ -231,6 +231,9 @@ struct GarnishPane: View {
                     Toggle("End-of-document ornament", isOn: $store.settings.garnishOrnament)
                     Toggle("Theme-matched Dock icon", isOn: $store.settings.garnishDockIcon)
                 }
+                Section {
+                    Toggle("Housetrained", isOn: $store.settings.garnishHousetrained)
+                }
             }
         }
     }
