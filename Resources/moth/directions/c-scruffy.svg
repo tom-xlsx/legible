@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" data-anchor-feet="34,50" data-anchor-eyes="15,21 22,21" data-anchor-book="14,42">
+  <!-- Direction C "Scruffy": side view of a clothes-moth tent; wings slope back from a fuzzy collar, ragged trailing edge, head forward -->
+  <g id="antennae" fill="none" stroke="var(--moth-body)" stroke-width="1.4" stroke-linecap="round">
+    <path d="M16 15 C12 10, 7 8, 2 10"/>
+    <path d="M21 14 C22 8, 27 5, 32 6"/>
+    <path d="M4 8.2 v3 M7 7.8 v3 M10 8 v3 M13 9.4 v2.6" stroke-width="1"/>
+    <path d="M31 4.4 v3 M28 4.6 v3 M25 5.4 v3 M23 7.2 v2.4" stroke-width="1"/>
+  </g>
+  <g id="tail" fill="var(--moth-body)">
+    <ellipse cx="57" cy="33" rx="5" ry="2.6" transform="rotate(12 57 33)"/>
+  </g>
+  <g id="wing-far" fill="var(--moth-wing)" opacity="0.7">
+    <path d="M24 22 L58 24 L58 34 L52 38 L46 35 L40 40 L34 37 L28 41 L23 36 Z"/>
+  </g>
+  <g id="wing-near" fill="var(--moth-wing)">
+    <path d="M22 28 L58 31 L57 41 L50 46 L45 42 L39 48 L33 44 L27 49 L21 44 L18 36 Z"/>
+    <path d="M27 33 L50 35" stroke="var(--moth-wing-mark)" stroke-width="1.3" stroke-linecap="round" fill="none"/>
+    <path d="M27 40 L46 41" stroke="var(--moth-wing-mark)" stroke-width="1" stroke-linecap="round" fill="none" opacity="0.6"/>
+    <circle cx="40" cy="38" r="1.5" fill="var(--moth-wing-mark)"/>
+  </g>
+  <g id="thorax" fill="var(--moth-body)">
+    <ellipse cx="22" cy="28" rx="8" ry="6"/>
+    <path d="M15 25 l-3 0 M15 29 l-3 1.5 M16 33 l-2.5 2.5" stroke="var(--moth-body)" stroke-width="1.3" stroke-linecap="round" fill="none"/>
+  </g>
+  <g id="head" fill="var(--moth-body)">
+    <circle cx="18" cy="21" r="6"/>
+  </g>
+  <g id="eyes">
+    <circle cx="15" cy="21" r="2.4" fill="var(--moth-eye-white)"/>
+    <circle cx="22" cy="21" r="2.4" fill="var(--moth-eye-white)"/>
+    <circle cx="14.6" cy="21.4" r="1.1" fill="var(--moth-eye)"/>
+    <circle cx="21.6" cy="21.4" r="1.1" fill="var(--moth-eye)"/>
+  </g>
+  <g id="glasses" fill="none" stroke="var(--moth-glasses)" stroke-width="1.3">
+    <circle cx="15" cy="21" r="3.4"/>
+    <circle cx="22" cy="21" r="3.4"/>
+    <path d="M18.6 21 h-0.2"/>
+    <path d="M25.4 20.4 l2.4 -0.6"/>
+  </g>
+  <g id="book">
+    <path d="M5 44 L14 47 L23 44 L23 38 L14 41 L5 38 Z" fill="var(--moth-book)"/>
+    <path d="M7 42.5 L14 45 L21 42.5 L21 39.5 L14 42 L7 39.5 Z" fill="var(--moth-page)"/>
+  </g>
+</svg>
