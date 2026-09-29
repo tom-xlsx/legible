@@ -107,6 +107,31 @@ final class EditorView: NSView {
         lineIndex = LineIndex(textView.string)
     }
 
+    func apply(settings: Settings) {
+        let size = CGFloat(settings.editorFontSize)
+        let font = settings.editorFont.isEmpty ? nil : NSFont(name: settings.editorFont, size: size)
+        textView.font = font ?? NSFont.monospacedSystemFont(ofSize: size, weight: .regular)
+        setWraps(settings.editorWrap)
+    }
+
+    private func setWraps(_ wraps: Bool) {
+        guard let container = textView.textContainer else { return }
+        if wraps {
+            container.widthTracksTextView = true
+            container.containerSize = NSSize(width: scrollView.contentSize.width, height: CGFloat.greatestFiniteMagnitude)
+            textView.isHorizontallyResizable = false
+            textView.autoresizingMask = [.width]
+            scrollView.hasHorizontalScroller = false
+        } else {
+            container.widthTracksTextView = false
+            container.containerSize = NSSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude)
+            textView.isHorizontallyResizable = true
+            textView.autoresizingMask = []
+            scrollView.hasHorizontalScroller = true
+        }
+        textView.needsLayout = true
+    }
+
     func apply(theme: Theme) {
         let bg = theme.backgroundColor
         let fg = theme.variable("fg").flatMap(NSColor.init(hex:)) ?? .textColor

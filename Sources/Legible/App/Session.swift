@@ -6,7 +6,7 @@ import AppKit
 /// so Legible keeps its own record.
 enum Session {
     private static let key = "session"
-    static var restoreEnabled = true
+    static var restoreEnabled: Bool { SettingsStore.shared.settings.restoreWindows }
 
     struct Entry: Codable {
         let path: String

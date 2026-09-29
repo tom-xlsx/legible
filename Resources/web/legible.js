@@ -11,6 +11,7 @@
 
   const root = document.getElementById('doc');
   const themeStyle = document.getElementById('theme');
+  const overrideStyle = document.getElementById('overrides');
   const escapeHtml = window.markdownit().utils.escapeHtml;
 
   /** Raw source of every code block in the current render, for copy buttons. */
@@ -425,6 +426,10 @@
       const focus = /@focus\s+true/i.test(css || '');
       document.documentElement.classList.toggle('focus-mode', focus);
       if (focus) updateFocus();
+    },
+
+    setOverrides(css) {
+      overrideStyle.textContent = css || '';
     },
 
     codeAt(index) {

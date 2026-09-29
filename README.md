@@ -61,6 +61,10 @@ A theme is a header comment plus a `:root` block:
 
 Files open in reading mode. ⌘E (or the toolbar button) opens an editor pane beside the preview: plain monospace text, live preview as you type, and scroll positions kept in step both ways. ⌘S saves; closing the pane returns to reading mode. The editor never opens on its own.
 
+## Settings
+
+⌘, opens Settings (General, Appearance, Reading, Editor, Garnish). Everything is stored in `~/Library/Application Support/Legible/settings.toml`, a commented file you can edit by hand; changes apply immediately in both directions. Legible only ever rewrites the single line a setting lives on, so your comments, ordering and any extra keys survive. If the file has a mistake, the app keeps the last good settings and shows which line is wrong. General has “Reveal Settings File” and “Reset to Defaults”. The file's format is deliberately simple: strings, numbers, booleans and `[tables]`; arrays, inline tables and multi-line strings are reported as errors rather than being rewritten. `schema = 1` at the top lets future versions migrate the file in place.
+
 ## Windows
 
 Quitting with documents open brings them back, at the same scroll position, next time Legible starts (unless you open a specific file). Closing a window forgets it.

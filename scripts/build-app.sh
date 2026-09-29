@@ -28,6 +28,8 @@ printf 'APPL????' > "$CONTENTS/PkgInfo"
 cp -R "$ROOT/Resources/web"    "$CONTENTS/Resources/web"
 cp -R "$ROOT/Resources/themes" "$CONTENTS/Resources/themes"
 cp    "$ROOT/build/Legible.icns" "$CONTENTS/Resources/Legible.icns"
+mkdir -p "$CONTENTS/Resources/bin"
+install -m 755 "$ROOT/scripts/legible" "$CONTENTS/Resources/bin/legible"
 
 codesign --force --sign - --timestamp=none "$APP"
 echo "Built $APP"

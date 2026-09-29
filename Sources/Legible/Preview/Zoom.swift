@@ -14,6 +14,7 @@ enum Zoom {
         }
         set {
             let clamped = min(max(newValue, minimum), maximum)
+            guard abs(clamped - level) > 0.0001 else { return }
             UserDefaults.standard.set(Double(clamped), forKey: key)
             NotificationCenter.default.post(name: didChange, object: nil)
         }

@@ -66,6 +66,11 @@ final class PreviewView: NSView {
         call("Legible.setTheme(\(jsLiteral(css)))")
     }
 
+    /// CSS applied after the theme (font and measure settings).
+    func setOverrides(css: String) {
+        call("Legible.setOverrides(\(jsLiteral(css)))")
+    }
+
     func setBackground(_ color: NSColor) {
         webView.underPageBackgroundColor = color
     }
@@ -222,7 +227,8 @@ enum LinkOpener {
         switch url.scheme {
         case DocumentSchemeHandler.scheme:
             guard let file = DocumentRegistry.shared.resolve(token: url.host ?? "", path: url.path) else { return }
-            if AppInfo.markdownExtensions.contains(file.pathExtension.lowercased()) {
+            if AppInfo.markdownExtensions.contains(file.pathExtension.lowercased()),
+               SettingsStore.shared.settings.openMarkdownLinksInLegible {
                 NSDocumentController.shared.openDocument(withContentsOf: file, display: true) { _, _, error in
                     if let error { NSApp.presentError(error) }
                 }

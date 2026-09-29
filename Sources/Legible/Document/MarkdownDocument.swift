@@ -43,7 +43,7 @@ final class MarkdownDocument: NSDocument {
     }
 
     private func fileChangedOnDisk() {
-        guard let url = fileURL else { return }
+        guard let url = fileURL, SettingsStore.shared.settings.liveReload else { return }
         if isDocumentEdited {
             viewController?.showDiskChangeNotice { [weak self] in self?.reloadFromDisk(url) }
         } else {

@@ -4,12 +4,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let launchOptions = LaunchOptions(arguments: CommandLine.arguments)
     private var snapshotJob: SnapshotJob?
     private var selfTestJob: SelfTestJob?
+    private var settingsSnapshotJob: SettingsSnapshotJob?
     private var restoredSession = false
 
     func applicationWillFinishLaunching(_ notification: Notification) {
         NSWindow.allowsAutomaticWindowTabbing = false
         ThemeManager.shared.start()
+        SettingsStore.shared.start()
+        SettingsApplier.shared.start()
         NSApp.mainMenu = MainMenu.build()
+    }
+
+    @objc func showSettings(_ sender: Any?) {
+        SettingsWindowController.shared.show()
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -26,6 +33,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             job.run()
         } else if let job = SelfTestJob(options: launchOptions) {
             selfTestJob = job
+            job.run()
+        } else if let job = SettingsSnapshotJob(options: launchOptions) {
+            settingsSnapshotJob = job
             job.run()
         }
     }

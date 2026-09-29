@@ -16,10 +16,11 @@ struct LaunchOptions {
     var showEditor = false
     var save = false
     var printDocuments = false
+    var settingsPane: String?
     var editText: String?
     var delay: Double = 0.8
 
-    var isHeadless: Bool { snapshotInput != nil || selfTestInput != nil }
+    var isHeadless: Bool { snapshotInput != nil || selfTestInput != nil || settingsPane != nil }
 
     init(arguments: [String]) {
         for argument in arguments {
@@ -41,6 +42,7 @@ struct LaunchOptions {
             case "zoom": zoom = Double(value)
             case "delay": delay = Double(value) ?? delay
             case "edit": editText = value
+            case "settings-pane": settingsPane = value
             case "size":
                 let parts = value.split(separator: "x").compactMap { Int($0) }
                 if parts.count == 2 { size = (parts[0], parts[1]) }
@@ -177,5 +179,37 @@ final class SnapshotJob {
     private func fail(_ message: String) -> Never {
         FileHandle.standardError.write(Data("legible --snapshot: \(message)\n".utf8))
         exit(1)
+    }
+}
+
+
+/// `Legible --settings-pane=general --out=out.png` renders one Settings pane to a PNG.
+final class SettingsSnapshotJob {
+    private let pane: String
+    private let output: URL
+
+    init?(options: LaunchOptions) {
+        guard let pane = options.settingsPane, let output = options.output else { return nil }
+        self.pane = pane
+        self.output = URL(fileURLWithPath: output)
+    }
+
+    func run() {
+        let controller = SettingsWindowController.shared
+        controller.show()
+        guard let window = controller.window, let tabs = window.contentViewController as? NSTabViewController else { exit(1) }
+        guard let index = tabs.tabViewItems.firstIndex(where: { $0.label.lowercased() == pane.lowercased() }) else {
+            FileHandle.standardError.write(Data("unknown pane '\(pane)'; use \(tabs.tabViewItems.map(\.label).joined(separator: ", "))\n".utf8))
+            exit(1)
+        }
+        tabs.selectedTabViewItemIndex = index
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [self] in
+            guard let view = window.contentView, let rep = view.bitmapImageRepForCachingDisplay(in: view.bounds) else { exit(1) }
+            view.cacheDisplay(in: view.bounds, to: rep)
+            guard let png = rep.representation(using: .png, properties: [:]) else { exit(1) }
+            do { try png.write(to: output) } catch { exit(1) }
+            print("Wrote \(output.path) (\(rep.pixelsWide)×\(rep.pixelsHigh))")
+            exit(0)
+        }
     }
 }

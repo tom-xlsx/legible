@@ -105,6 +105,10 @@ final class DocumentViewController: NSViewController {
         observers.append(center.addObserver(forName: Zoom.didChange, object: nil, queue: .main) { [weak self] _ in
             self?.preview.zoom = Zoom.level
         })
+        observers.append(center.addObserver(forName: SettingsStore.didChange, object: nil, queue: .main) { [weak self] _ in
+            self?.applySettings()
+        })
+        applySettings()
 
         findBar.onQueryChange = { [weak self] query in self?.find(query, backwards: false) }
         findBar.onNext = { [weak self] in self?.findNext(backwards: false) }
@@ -120,6 +124,36 @@ final class DocumentViewController: NSViewController {
         preview.setBackground(theme.backgroundColor)
         editor.apply(theme: theme)
         view.window?.backgroundColor = theme.backgroundColor
+    }
+
+    private var showingSettingsError = false
+
+    func applySettings() {
+        let store = SettingsStore.shared
+        let s = store.settings
+        var css = ":root {"
+        if !s.fontBody.isEmpty { css += " --font-body: \(cssFontList(s.fontBody));" }
+        if !s.fontMono.isEmpty { css += " --font-mono: \(cssFontList(s.fontMono));" }
+        if s.fontSize > 0 { css += " --font-size: \(s.fontSize)px;" }
+        if s.lineHeight > 0 { css += " --line-height: \(s.lineHeight);" }
+        if s.measure > 0 { css += " --measure: \(s.measure)ch;" }
+        css += " }"
+        preview.setOverrides(css: css)
+        editor.apply(settings: s)
+
+        if let error = store.fileError {
+            showingSettingsError = true
+            noticeBar.show(error, actions: [.init(title: "Reveal File", handler: { store.revealFile() })])
+            view.needsLayout = true
+        } else if showingSettingsError {
+            showingSettingsError = false
+            noticeBar.hide()
+        }
+    }
+
+    private func cssFontList(_ family: String) -> String {
+        let quoted = "\"" + family.replacingOccurrences(of: "\"", with: "") + "\""
+        return quoted + ", " + (family.lowercased().contains("mono") ? "ui-monospace, monospace" : "system-ui, sans-serif")
     }
 
     func render(preserveScroll: Bool) {
@@ -173,7 +207,7 @@ final class DocumentViewController: NSViewController {
             guard let self else { return }
             // After an edit the editor leads: once the new content is in, line the preview up with it.
             afterNextRender = { [weak self] in
-                guard let self, isEditorVisible else { return }
+                guard let self, isEditorVisible, SettingsStore.shared.settings.scrollSync else { return }
                 ignorePreviewScrollUntil = Date().addingTimeInterval(0.25)
                 preview.scroll(toLine: editor.topLine)
             }
@@ -184,13 +218,13 @@ final class DocumentViewController: NSViewController {
     // MARK: Scroll sync
 
     private func editorDidScroll(toLine line: Double) {
-        guard isEditorVisible, Date() > ignoreEditorScrollUntil else { return }
+        guard isEditorVisible, SettingsStore.shared.settings.scrollSync, Date() > ignoreEditorScrollUntil else { return }
         ignorePreviewScrollUntil = Date().addingTimeInterval(0.25)
         preview.scroll(toLine: line)
     }
 
     private func previewDidScroll(toLine line: Double) {
-        guard isEditorVisible, Date() > ignorePreviewScrollUntil else { return }
+        guard isEditorVisible, SettingsStore.shared.settings.scrollSync, Date() > ignorePreviewScrollUntil else { return }
         ignoreEditorScrollUntil = Date().addingTimeInterval(0.25)
         editor.scroll(toLine: line)
     }

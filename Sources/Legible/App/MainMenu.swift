@@ -9,7 +9,7 @@ enum MainMenu {
         let appMenu = NSMenu(title: AppInfo.name)
         appMenu.item("About \(AppInfo.name)", #selector(AppDelegate.showAbout(_:)))
         appMenu.addItem(.separator())
-        appMenu.item("Settings…", nil, ",").isEnabled = false
+        appMenu.item("Settings…", #selector(AppDelegate.showSettings(_:)), ",")
         appMenu.addItem(.separator())
         let services = NSMenu(title: "Services")
         appMenu.item("Services", nil).submenu = services
