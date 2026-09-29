@@ -3,6 +3,11 @@ import AppKit
 final class MarkdownDocument: NSDocument {
     private(set) var text = ""
     weak var viewController: DocumentViewController?
+    private var watcher: FileWatcher?
+
+    override var fileURL: URL? {
+        didSet { watchFile() }
+    }
 
     override class var autosavesInPlace: Bool { false }
     override class func canConcurrentlyReadDocuments(ofType typeName: String) -> Bool { true }
@@ -19,6 +24,41 @@ final class MarkdownDocument: NSDocument {
 
     override func data(ofType typeName: String) throws -> Data {
         Data(text.utf8)
+    }
+
+    override func save(to url: URL, ofType typeName: String, for saveOperation: NSDocument.SaveOperationType,
+                       completionHandler: @escaping (Error?) -> Void) {
+        super.save(to: url, ofType: typeName, for: saveOperation) { [weak self] error in
+            self?.watcher?.acknowledgeOwnWrite()
+            completionHandler(error)
+        }
+    }
+
+    // MARK: Live reload
+
+    private func watchFile() {
+        watcher = nil
+        guard let url = fileURL else { return }
+        watcher = FileWatcher(url: url) { [weak self] in self?.fileChangedOnDisk() }
+    }
+
+    private func fileChangedOnDisk() {
+        guard let url = fileURL else { return }
+        if isDocumentEdited {
+            viewController?.showDiskChangeNotice { [weak self] in self?.reloadFromDisk(url) }
+        } else {
+            reloadFromDisk(url)
+        }
+    }
+
+    /// Re-reads the file, keeping the preview's scroll position. Discards unsaved edits.
+    func reloadFromDisk(_ url: URL? = nil) {
+        guard let url = url ?? fileURL else { return }
+        do {
+            try revert(toContentsOf: url, ofType: fileType ?? "net.daringfireball.markdown")
+        } catch {
+            NSLog("Legible: reload failed: %@", error.localizedDescription)
+        }
     }
 
     override func makeWindowControllers() {

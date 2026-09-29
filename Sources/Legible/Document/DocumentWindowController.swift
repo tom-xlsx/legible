@@ -55,12 +55,7 @@ final class DocumentWindowController: NSWindowController {
     @objc func zoomActual(_ sender: Any?) { Zoom.level = 1 }
 
     @objc func reloadDocument(_ sender: Any?) {
-        guard let doc = markdownDocument, let url = doc.fileURL else { return }
-        do {
-            try doc.read(from: url, ofType: doc.fileType ?? "net.daringfireball.markdown")
-        } catch {
-            NSApp.presentError(error)
-        }
+        markdownDocument?.reloadFromDisk()
     }
 
 }

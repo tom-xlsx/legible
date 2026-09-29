@@ -29,8 +29,7 @@ install: app
 	mkdir -p "$(BINDIR)"
 	install -m 755 scripts/legible "$(BINDIR)/legible"
 	@echo "Installed $(INSTALL) and $(BINDIR)/legible"
-	@echo "To make Legible the default app for Markdown: open a .md file, then Legible › Settings › General › “Use Legible for Markdown files”,"
-	@echo "or in Finder: Get Info on any .md file › Open with › Legible › Change All…"
+	@echo "One-time step to make Legible the default for .md files: File › Use Legible for Markdown Files…"
 
 ## Unit tests.
 test:

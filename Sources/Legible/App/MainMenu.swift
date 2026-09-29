@@ -32,6 +32,8 @@ enum MainMenu {
         file.item("Revert to Saved", #selector(NSDocument.revertToSaved(_:)))
         file.addItem(.separator())
         file.item("Show in Finder", #selector(DocumentWindowController.showInFinder(_:)), "r", mods: [.command, .shift])
+        file.addItem(.separator())
+        file.item("Use Legible for Markdown Files…", #selector(DefaultAppMenuTarget.makeDefault(_:)), target: DefaultAppMenuTarget.shared)
         main.item("File", nil).submenu = file
 
         // Edit

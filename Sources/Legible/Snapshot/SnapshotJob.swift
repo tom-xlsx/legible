@@ -15,6 +15,7 @@ struct LaunchOptions {
     var captureWindow = false
     var showEditor = false
     var save = false
+    var printDocuments = false
     var editText: String?
     var delay: Double = 0.8
 
@@ -25,6 +26,7 @@ struct LaunchOptions {
             if argument == "--window" { captureWindow = true; continue }
             if argument == "--editor" { showEditor = true; continue }
             if argument == "--save" { save = true; continue }
+            if argument == "--print-documents" { printDocuments = true; continue }
             guard argument.hasPrefix("--"), let eq = argument.firstIndex(of: "=") else { continue }
             let key = argument[argument.index(argument.startIndex, offsetBy: 2)..<eq]
             let value = String(argument[argument.index(after: eq)...])
@@ -121,14 +123,11 @@ final class SnapshotJob {
                     controller.findBarForTesting.searchField.stringValue = query
                     controller.findNext(backwards: false)
                 }
-                let overlays: [NSView] = self.options.captureWindow ? [controller.editor, controller.findBarForTesting] : []
+                let overlays: [NSView] = self.options.captureWindow ? [controller.editor, controller.findBarForTesting, controller.noticeBarForTesting] : []
                 DispatchQueue.main.asyncAfter(deadline: .now() + self.options.delay) {
-                    if controller.isEditorVisible {
-                        controller.preview.evaluate("Legible.topLine()") { line in
-                            print("sync: preview top line \(line ?? "?"), editor top line \(controller.editor.topLine)")
-                            self.capture(controller.preview.webView, in: controller.view, overlays: overlays)
-                        }
-                    } else {
+                    controller.preview.evaluate("Legible.topLine()") { line in
+                        let editorLine = controller.isEditorVisible ? ", editor top line \(controller.editor.topLine)" : ""
+                        print("preview top line \(line ?? "?")\(editorLine); notice: \(controller.noticeBarForTesting.isHidden ? "hidden" : controller.noticeBarForTesting.message)")
                         self.capture(controller.preview.webView, in: controller.view, overlays: overlays)
                     }
                 }

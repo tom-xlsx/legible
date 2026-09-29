@@ -6,6 +6,7 @@ final class DocumentViewController: NSViewController {
     let editor = EditorView(frame: .zero)
     private let splitView = NSSplitView()
     private let findBar = FindBar(frame: .zero)
+    private let noticeBar = NoticeBar(frame: .zero)
     private let token: String
     private var observers: [NSObjectProtocol] = []
     private var renderTimer: Timer?
@@ -15,6 +16,8 @@ final class DocumentViewController: NSViewController {
 
     /// Set once the first render has completed (used by the snapshot and self-test jobs).
     private(set) var hasRendered = false
+    /// Last reported top line of the preview (kept for session restore).
+    private(set) var lastTopLine: Double = 0
     var onRendered: ((PreviewView.RenderInfo) -> Void)?
     private var afterNextRender: (() -> Void)?
 
@@ -53,8 +56,28 @@ final class DocumentViewController: NSViewController {
                                        y: container.bounds.height - findBar.frame.height - 14)
         findBar.autoresizingMask = [.minXMargin, .minYMargin]
         container.addSubview(findBar)
+
+        noticeBar.autoresizingMask = [.minXMargin, .maxXMargin, .minYMargin]
+        container.addSubview(noticeBar)
         view = container
     }
+
+    override func viewDidLayout() {
+        super.viewDidLayout()
+        noticeBar.frame.origin = NSPoint(x: ((view.bounds.width - noticeBar.frame.width) / 2).rounded(),
+                                         y: view.bounds.height - noticeBar.frame.height - 12)
+    }
+
+    /// The file changed on disk while there are unsaved edits: let the person decide.
+    func showDiskChangeNotice(reload: @escaping () -> Void) {
+        noticeBar.show("This file was changed on disk. Your unsaved edits are still here.", actions: [
+            .init(title: "Reload", handler: reload),
+            .init(title: "Keep Mine", handler: {}),
+        ])
+        view.needsLayout = true
+    }
+
+    var noticeBarForTesting: NoticeBar { noticeBar }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -66,7 +89,10 @@ final class DocumentViewController: NSViewController {
             pending?()
             onRendered?(info)
         }
-        preview.onScroll = { [weak self] line in self?.previewDidScroll(toLine: line) }
+        preview.onScroll = { [weak self] line in
+            self?.lastTopLine = line
+            self?.previewDidScroll(toLine: line)
+        }
         preview.zoom = Zoom.level
         editor.textView.delegate = self
         editor.onScroll = { [weak self] line in self?.editorDidScroll(toLine: line) }
@@ -104,7 +130,12 @@ final class DocumentViewController: NSViewController {
 
     /// Called by the document when its text was replaced from disk.
     func documentTextDidChangeExternally() {
-        if isEditorVisible { editor.text = document.text }
+        noticeBar.hide()
+        if isEditorVisible {
+            let line = editor.topLine
+            editor.text = document.text
+            editor.scroll(toLine: line)
+        }
         render(preserveScroll: true)
     }
 
