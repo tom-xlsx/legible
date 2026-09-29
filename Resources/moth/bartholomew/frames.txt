@@ -1,5 +1,5 @@
-# Bartholomew, pixel edition (Marmalade). 16×16 frames; scripts/pixel-moth.py turns
-# this file into sheet.png at 2× (32×32 per frame) using the Marmalade palette.
+# Bartholomew. 16×16 frames; scripts/pixel-moth.py turns
+# this file into sheet.svg, one <g> per frame, coloured by the moth palette tokens.
 # Legend: . transparent  a antenna  b body  w wing  s wing-shade  m wing-mark
 #         e eye  p pupil  g glasses  k book cover  n page  h magnifier  l closed lid
 # Frames are separated by a line starting with "@ name". Poses map to frames in manifest.json.

@@ -99,4 +99,10 @@
 
   /* Optional: only read when the header has "@focus true" */
   /* --focus-dim: 0.35; */    /* opacity of blocks away from the reading line */
+
+  /* Optional: the moth's colours. Legible derives these from the variables above
+     (body from --fg-muted, wings from --bg mixed toward --fg-muted, glasses and
+     book from --link); set any of them to take over. */
+  /* --moth-body: #57544d; --moth-wing: #b8b5ae; --moth-wing-shade: #a29e96; --moth-wing-mark: #605c54;
+     --moth-eye-white: #fdfcf9; --moth-eye: #2c2a26; --moth-glasses: #35619b; --moth-book: #35619b; --moth-page: #fdfcf9; */
 }

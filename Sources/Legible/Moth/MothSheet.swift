@@ -46,10 +46,9 @@ final class MothSheetJob {
                 FileHandle.standardError.write(Data("pack \(path): \(error)\n".utf8)); exit(1)
             }
         }
-        let rig: MothPack, pixel: MothPack
+        let rig: MothPack
         do {
             rig = try MothPack.builtIn("bartholomew")
-            pixel = try MothPack.builtIn("marmalade-pixel")
         } catch {
             FileHandle.standardError.write(Data("built-in pack: \(error)\n".utf8)); exit(1)
         }
@@ -79,7 +78,7 @@ final class MothSheetJob {
         for (ri, theme) in themes.enumerated() {
             let yTop = sheetSize.height - (gap + label + CGFloat(ri) * (cell + gap)) * scale
             (theme.name as NSString).draw(at: NSPoint(x: gap * scale, y: yTop - cell * scale / 2), withAttributes: labelAttrs)
-            let pack = override ?? (theme.id == "marmalade" ? pixel : rig)
+            let pack = override ?? rig
             let palette = MothPack.palette(for: theme)
             let variants = override == nil ? MothPack.variants(for: theme) : []
             let fg = theme.variable("fg").flatMap(NSColor.init(hex:)) ?? .black
@@ -94,7 +93,7 @@ final class MothSheetJob {
                 for size in sizes {
                     if let image = pack.image(pose: pose, variants: variants, palette: palette, height: size) {
                         let y = tile.maxY - 6 * scale - size * scale
-                        NSGraphicsContext.current?.imageInterpolation = pack.kind == .spritesheet ? .none : .high
+                        NSGraphicsContext.current?.imageInterpolation = pack.kind == .spritesheet && !pack.isVectorSheet ? .none : .high
                         image.draw(in: NSRect(x: cx, y: y, width: size * scale, height: size * scale), from: .zero, operation: .sourceOver, fraction: 1)
                     }
                     cx += (size + 8) * scale

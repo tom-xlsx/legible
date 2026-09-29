@@ -43,9 +43,10 @@ struct MothPack {
     let name: String
     let kind: Kind
     let size: CGFloat
-    let svgSource: String?          // svg-rig
-    let sheet: NSImage?             // spritesheet
+    let svgSource: String?          // svg-rig, or a spritesheet whose asset is an SVG of frame groups
+    let sheet: NSImage?             // spritesheet with a PNG asset
     let frameIndex: [String: Int]   // spritesheet
+    var isVectorSheet: Bool { kind == .spritesheet && svgSource != nil }
 
     struct LoadError: Error, CustomStringConvertible {
         let problems: [String]
@@ -101,8 +102,6 @@ struct MothPack {
                 }
             }
         case .spritesheet:
-            sheet = NSImage(contentsOf: assetURL)
-            if sheet == nil { problems.append("cannot read \(assetName) as an image") }
             let indexName = manifest["frameIndex"] as? String ?? "frames.json"
             if let data = try? Data(contentsOf: directory.appendingPathComponent(indexName)),
                let index = try? JSONSerialization.jsonObject(with: data) as? [String: Int] {
@@ -112,12 +111,26 @@ struct MothPack {
             }
             let frameSize = manifest["frameSize"] as? [Double] ?? []
             if frameSize.count != 2 { problems.append("frameSize must be [width, height]") }
-            if let sheet, frameSize.count == 2 {
-                let columns = Int(sheet.size.width / CGFloat(frameSize[0]))
+            if assetURL.pathExtension.lowercased() == "svg" {
+                // Frames are <g id="name"> groups coloured with the palette tokens.
+                svgSource = try? String(contentsOf: assetURL, encoding: .utf8)
+                if svgSource == nil { problems.append("cannot read \(assetName)") }
                 for (pose, spec) in poses {
                     for frame in (spec as? [String: Any])?["frames"] as? [String] ?? [] {
-                        guard let column = frameIndex[frame] else { problems.append("pose \"\(pose)\" uses unknown frame \"\(frame)\""); continue }
-                        if column >= columns { problems.append("frame \"\(frame)\" (column \(column)) is outside the sheet") }
+                        if frameIndex[frame] == nil { problems.append("pose \"\(pose)\" uses unknown frame \"\(frame)\"") }
+                        else if let svg = svgSource, !svg.contains("<g id=\"\(frame)\"") { problems.append("frame \"\(frame)\" is not in \(assetName)") }
+                    }
+                }
+            } else {
+                sheet = NSImage(contentsOf: assetURL)
+                if sheet == nil { problems.append("cannot read \(assetName) as an image") }
+                if let sheet, frameSize.count == 2 {
+                    let columns = Int(sheet.size.width / CGFloat(frameSize[0]))
+                    for (pose, spec) in poses {
+                        for frame in (spec as? [String: Any])?["frames"] as? [String] ?? [] {
+                            guard let column = frameIndex[frame] else { problems.append("pose \"\(pose)\" uses unknown frame \"\(frame)\""); continue }
+                            if column >= columns { problems.append("frame \"\(frame)\" (column \(column)) is outside the sheet") }
+                        }
                     }
                 }
             }
@@ -137,11 +150,12 @@ struct MothPack {
         let bg = rgb("bg", "#ffffff"), fg = rgb("fg", "#222222"), muted = rgb("fg-muted", "#666666"), link = rgb("link", "#3366aa")
         let dark = bg.isDark
         let white = NSColor(hex: "#ffffff")!
+        // Body darker than wings on dark themes (so the eyes and glasses read), darker still on light ones.
         var p: [String: String] = [
-            "moth-body": muted.mixed(with: fg, 0.25).hexString,
-            "moth-wing": bg.mixed(with: muted, dark ? 0.55 : 0.42).hexString,
-            "moth-wing-shade": bg.mixed(with: muted, dark ? 0.72 : 0.58).hexString,
-            "moth-wing-mark": muted.mixed(with: fg, 0.1).hexString,
+            "moth-body": dark ? muted.mixed(with: bg, 0.2).hexString : muted.mixed(with: fg, 0.3).hexString,
+            "moth-wing": bg.mixed(with: muted, dark ? 0.62 : 0.42).hexString,
+            "moth-wing-shade": bg.mixed(with: muted, dark ? 0.45 : 0.58).hexString,
+            "moth-wing-mark": dark ? bg.mixed(with: muted, 0.25).hexString : muted.mixed(with: fg, 0.2).hexString,
             "moth-eye": fg.hexString,
             "moth-eye-white": bg.mixed(with: dark ? fg : white, dark ? 0.75 : 0.6).hexString,
             "moth-glasses": link.hexString,
@@ -212,7 +226,33 @@ struct MothPack {
         return svg
     }
 
+    /// Frame names a spritesheet pose cycles through.
+    func frameNames(pose: String) -> [String] {
+        let name = pose == "fly-2" ? "fly" : pose
+        let names = ((manifest["poses"] as? [String: [String: Any]])?[name]?["frames"] as? [String]) ?? []
+        return pose == "fly-2" ? Array(names.dropFirst()) : names
+    }
+
+    /// A standalone SVG showing one frame of a vector spritesheet.
+    func frameSVG(_ frame: String, palette: [String: String]) -> String? {
+        guard isVectorSheet, var svg = svgSource else { return nil }
+        for other in frameIndex.keys where other != frame {
+            let open = "<g id=\"\(other)\""
+            if let start = svg.range(of: open), let end = svg.range(of: "</g>", range: start.upperBound..<svg.endIndex) {
+                svg.removeSubrange(start.lowerBound..<end.upperBound)
+            }
+        }
+        for (token, value) in palette { svg = svg.replacingOccurrences(of: "var(--\(token))", with: value) }
+        return svg
+    }
+
     func image(pose: String, variants: Set<String>, palette: [String: String], height: CGFloat) -> NSImage? {
+        if isVectorSheet {
+            guard let frame = frameNames(pose: pose).first, let svg = frameSVG(frame, palette: palette),
+                  let image = NSImage(data: Data(svg.utf8)) else { return nil }
+            image.size = NSSize(width: height, height: height)
+            return image
+        }
         switch kind {
         case .svgRig:
             guard let svg = svg(pose: pose, variants: variants, palette: palette), let image = NSImage(data: Data(svg.utf8)) else { return nil }
@@ -257,6 +297,17 @@ struct MothPack {
 
     static func builtIn(_ folder: String) throws -> MothPack {
         try load(directory: builtInRoot.appendingPathComponent(folder))
+    }
+
+    /// The pack in use: a valid user pack, otherwise the built-in one.
+    static func current() -> (pack: MothPack, problem: String?) {
+        let user = userDirectory
+        if FileManager.default.fileExists(atPath: user.appendingPathComponent("manifest.json").path) {
+            do { return (try load(directory: user), nil) } catch {
+                return (try! builtIn("bartholomew"), "Moth pack in \(user.path): \(error). Using the built-in moth.")
+            }
+        }
+        return (try! builtIn("bartholomew"), nil)
     }
 
     /// Variant flags the app requests for a theme.

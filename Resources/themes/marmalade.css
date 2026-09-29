@@ -56,4 +56,15 @@
   --hl-deletion-bg: #4a2a14;
   --hl-keyword-weight: 600;
   --hl-comment-style: italic;
+
+  /* Optional moth palette overrides (see the theme template). */
+  --moth-body: #a67c46;
+  --moth-wing: #e0a45a;
+  --moth-wing-shade: #b07f3f;
+  --moth-wing-mark: #7a5a30;
+  --moth-eye-white: #fff0d0;
+  --moth-eye: #1d1610;
+  --moth-glasses: #f0c070;
+  --moth-book: #f0c070;
+  --moth-page: #fff0d0;
 }

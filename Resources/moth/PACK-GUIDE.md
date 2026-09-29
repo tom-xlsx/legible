@@ -43,7 +43,9 @@ Common fields:
 Theme looks are flags, not poses. The app asks for `glasses-large` (Big
 Breakfast), `eyes-drowsy` (Decaf) and `body-faint` (Midnight Snack). An
 `svg-rig` pack declares how each flag changes its parts under `variants`; a
-`spritesheet` pack may ignore them. Marmalade uses the pixel pack instead.
+`spritesheet` pack may provide a frame named `frame@flag` (for example
+`perch-idle@eyes-drowsy`) which is used instead when that flag is on, or ignore
+the flag.
 
 ## Palette tokens
 
@@ -55,7 +57,7 @@ toward `--fg-muted` so they stand out by lightness, glasses and book from
 `--moth-body`, `--moth-wing`, `--moth-wing-shade`, `--moth-wing-mark`,
 `--moth-eye`, `--moth-eye-white`, `--moth-glasses`, `--moth-book`, `--moth-page`.
 
-## `svg-rig` packs (bartholomew/)
+## `svg-rig` packs
 
 The asset is one SVG whose parts are `<g id="…">` groups. The manifest lists
 every part with its `pivot` (the point it rotates and scales around) and
@@ -78,26 +80,32 @@ flap cycle. `headGroup` names the parts that move together for nods and
 glances; `pupils` names the elements whose `cx`/`cy` shift for `lookAt`, by up
 to `pupilRange` units.
 
-Parts in Bartholomew: `antenna-left`, `antenna-right`, `arm-wave`, `tail`,
-`wing-left`, `wing-right`, `thorax`, `head`, `eyes` (with `eye-left`,
-`eye-right`, `pupil-left`, `pupil-right`), `half-lids`, `lids`, `glasses`,
-`magnifier`, `book-open`, `page-flip`, `book-closed`.
+No built-in pack uses this type at the moment; the loader and sheet renderer
+support it for replacement packs.
 
-## `spritesheet` packs (marmalade-pixel/)
+## `spritesheet` packs (bartholomew/)
 
-The asset is a PNG of equal-sized frames laid out left to right. `frameSize`
-gives the frame size in pixels, `pixelScale` how many image pixels make one art
-pixel (the sheet is drawn with hard edges, no smoothing), and `frameIndex`
-names a JSON file mapping frame names to column numbers. Each pose lists its
-`frames` by name and an optional `fps` for cycling:
+Frames are shown one at a time. `frameSize` is the frame size in art pixels,
+`pixelScale` how many screen pixels one art pixel gets at zoom 1 (drawn with
+hard edges, no smoothing), and `frameIndex` names a JSON file mapping frame
+names to frame numbers. Each pose lists its `frames` by name and an optional
+`fps` for cycling:
 
 ```json
 "fly": { "frames": ["fly", "fly-2"], "fps": 8 }
 ```
 
-The pixel edition's source of truth is `frames.txt`, a set of 16×16 character
-grids; `scripts/pixel-moth.py` turns it into `sheet.png` and `frames.json`
-using the Marmalade palette. Edit the text, run the script, commit both.
+The asset can be either:
+
+- an **SVG** whose top-level `<g id="frame-name">` groups are the frames, all
+  drawn at the origin and coloured with the palette tokens (this is how the
+  built-in Bartholomew takes on every theme's colours), or
+- a **PNG** of equal-sized frames laid out left to right, with baked colours.
+
+Bartholomew's source of truth is `frames.txt`, a set of 16×16 character grids
+(one letter per palette token); `scripts/pixel-moth.py` turns it into
+`sheet.svg` and `frames.json`. Edit the text, run the script, commit all three.
+A spritesheet pack may ignore variant flags.
 
 ## Validation
 
