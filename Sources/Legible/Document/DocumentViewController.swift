@@ -305,11 +305,15 @@ final class DocumentViewController: NSViewController {
         let oldWidth = webView.bounds.width
         webView.takeSnapshot(with: config) { [weak self] image, _ in
             guard let self, let image else { change(); return }
+            // The cover fills the whole preview (including any strip the resize uncovers) in the
+            // page background colour, with the snapshot centred on the new frame.
             let overlay = NSImageView(image: image)
             overlay.imageScaling = .scaleNone
             overlay.imageAlignment = .alignTop
             overlay.wantsLayer = true
             overlay.layer?.backgroundColor = ThemeManager.shared.effective.backgroundColor.cgColor
+            overlay.frame = preview.bounds
+            overlay.autoresizingMask = [.width, .height]
             preview.clipsToBounds = true
             preview.addSubview(overlay, positioned: .above, relativeTo: webView)
             NSAnimationContext.runAnimationGroup { context in
@@ -318,9 +322,8 @@ final class DocumentViewController: NSViewController {
                 change()
                 self.view.layoutSubtreeIfNeeded()
             }
-            let newWidth = preview.bounds.width
-            overlay.frame = NSRect(x: ((newWidth - oldWidth) / 2).rounded(), y: preview.bounds.height - image.size.height,
-                                   width: oldWidth, height: image.size.height)
+            overlay.frame = preview.bounds
+            _ = oldWidth
             var removed = false
             let remove = { if !removed { removed = true; overlay.removeFromSuperview() } }
             webView.callAsyncJavaScript("await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))",
