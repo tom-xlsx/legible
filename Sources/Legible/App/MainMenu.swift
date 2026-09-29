@@ -51,6 +51,8 @@ enum MainMenu {
 
         // View
         let view = NSMenu(title: "View")
+        view.item("Show Editor", #selector(DocumentWindowController.toggleEditor(_:)), "e")
+        view.addItem(.separator())
         let themes = NSMenu(title: "Theme")
         themes.delegate = ThemeManager.shared
         view.item("Theme", nil).submenu = themes

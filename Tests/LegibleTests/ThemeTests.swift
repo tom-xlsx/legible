@@ -46,3 +46,22 @@ final class ThemeTests: XCTestCase {
         XCTAssertFalse(LaunchOptions(arguments: ["Legible"]).isHeadless)
     }
 }
+
+final class LineIndexTests: XCTestCase {
+    func testLineMapping() {
+        let index = LineIndex("a\nbb\n\nccc")
+        XCTAssertEqual(index.lineCount, 4)
+        XCTAssertEqual(index.line(at: 0), 0)
+        XCTAssertEqual(index.line(at: 1), 0)
+        XCTAssertEqual(index.line(at: 2), 1)
+        XCTAssertEqual(index.line(at: 4), 1)
+        XCTAssertEqual(index.line(at: 5), 2)
+        XCTAssertEqual(index.line(at: 6), 3)
+        XCTAssertEqual(index.line(at: 99), 3)
+        XCTAssertEqual(index.offset(ofLine: 3), 6)
+        XCTAssertEqual(index.offset(ofLine: 42), 6)
+        XCTAssertEqual(LineIndex("").lineCount, 1)
+        XCTAssertEqual(LineIndex("x\n").lineCount, 1)
+        XCTAssertEqual(LineIndex("x\r\ny").line(at: 3), 1)
+    }
+}

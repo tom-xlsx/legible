@@ -9,7 +9,12 @@ final class MarkdownDocument: NSDocument {
 
     override func read(from data: Data, ofType typeName: String) throws {
         text = Self.decode(data)
-        viewController?.render(preserveScroll: true)
+        viewController?.documentTextDidChangeExternally()
+    }
+
+    /// Text edited in the editor pane. Change tracking comes from the undo manager the text view shares.
+    func updateText(_ newText: String) {
+        text = newText
     }
 
     override func data(ofType typeName: String) throws -> Data {

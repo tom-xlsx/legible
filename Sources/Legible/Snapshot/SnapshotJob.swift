@@ -13,6 +13,9 @@ struct LaunchOptions {
     var find: String?
     var zoom: Double?
     var captureWindow = false
+    var showEditor = false
+    var save = false
+    var editText: String?
     var delay: Double = 0.8
 
     var isHeadless: Bool { snapshotInput != nil || selfTestInput != nil }
@@ -20,6 +23,8 @@ struct LaunchOptions {
     init(arguments: [String]) {
         for argument in arguments {
             if argument == "--window" { captureWindow = true; continue }
+            if argument == "--editor" { showEditor = true; continue }
+            if argument == "--save" { save = true; continue }
             guard argument.hasPrefix("--"), let eq = argument.firstIndex(of: "=") else { continue }
             let key = argument[argument.index(argument.startIndex, offsetBy: 2)..<eq]
             let value = String(argument[argument.index(after: eq)...])
@@ -33,6 +38,7 @@ struct LaunchOptions {
             case "find": find = value
             case "zoom": zoom = Double(value)
             case "delay": delay = Double(value) ?? delay
+            case "edit": editText = value
             case "size":
                 let parts = value.split(separator: "x").compactMap { Int($0) }
                 if parts.count == 2 { size = (parts[0], parts[1]) }
@@ -43,7 +49,8 @@ struct LaunchOptions {
 }
 
 /// `Legible --snapshot=in.md --out=out.png [--theme=id] [--size=WxH] [--scroll=Y|selector]
-///          [--zoom=1.3] [--eval=JS] [--find=query] [--window] [--delay=seconds]`
+///          [--zoom=1.3] [--eval=JS] [--find=query] [--window] [--delay=seconds] [--editor] [--edit=text] [--save]`
+/// --editor opens the editor pane; --edit appends text to it (and implies --editor).
 /// Renders a document, writes a PNG of the viewport (or the whole window with
 /// --window, which includes AppKit overlays such as the find bar), and exits
 /// non-zero if the page reported any JavaScript error. Used by `make check`
@@ -84,19 +91,46 @@ final class SnapshotJob {
                 window.setContentSize(NSSize(width: size.width, height: size.height))
             }
             controller.preview.onError = { [weak self] message in self?.errors.append(message) }
+            var proceeded = false
             let proceed = { [weak self, weak controller] in
-                guard let self, let controller else { return }
+                guard let self, let controller, !proceeded else { return }
+                proceeded = true
+                controller.onRendered = nil
                 if let zoom = options.zoom { Zoom.level = zoom }
-                if let scroll = options.scroll { controller.preview.scroll(to: scroll) }
+                if options.showEditor || options.editText != nil { controller.showEditor() }
+                if let text = options.editText {
+                    controller.editor.textView.setSelectedRange(NSRange(location: (controller.editor.text as NSString).length, length: 0))
+                    controller.editor.textView.insertText(text, replacementRange: controller.editor.textView.selectedRange())
+                }
+                if options.save {
+                    // Let the text view close its undo group first, as happens between keystrokes.
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        print("edited before save: \(document.isDocumentEdited)")
+                        document.save(nil)
+                        print("edited after save: \(document.isDocumentEdited)")
+                    }
+                }
+                if let scroll = options.scroll {
+                    // With the editor open, wait out the scroll-sync feedback guard first, as a person would.
+                    let wait = controller.isEditorVisible ? 0.4 : 0
+                    DispatchQueue.main.asyncAfter(deadline: .now() + wait) { controller.preview.scroll(to: scroll) }
+                }
                 if let js = options.eval { controller.preview.evaluate(js) { _ in } }
                 if let query = options.find {
                     controller.showFind()
                     controller.findBarForTesting.searchField.stringValue = query
                     controller.findNext(backwards: false)
                 }
-                let overlays: [NSView] = self.options.captureWindow ? [controller.findBarForTesting] : []
+                let overlays: [NSView] = self.options.captureWindow ? [controller.editor, controller.findBarForTesting] : []
                 DispatchQueue.main.asyncAfter(deadline: .now() + self.options.delay) {
-                    self.capture(controller.preview.webView, overlays: overlays)
+                    if controller.isEditorVisible {
+                        controller.preview.evaluate("Legible.topLine()") { line in
+                            print("sync: preview top line \(line ?? "?"), editor top line \(controller.editor.topLine)")
+                            self.capture(controller.preview.webView, in: controller.view, overlays: overlays)
+                        }
+                    } else {
+                        self.capture(controller.preview.webView, in: controller.view, overlays: overlays)
+                    }
                 }
             }
             if controller.hasRendered { proceed() } else { controller.onRendered = { _ in proceed() } }
@@ -111,19 +145,25 @@ final class SnapshotJob {
         exit(1)
     }
 
-    /// Snapshots the web view and draws any AppKit overlays (e.g. the find bar) on top,
-    /// since WKWebView snapshots only contain web content.
-    private func capture(_ webView: WKWebView, overlays: [NSView]) {
+    /// Snapshots the web view; with overlays, composes the whole content view
+    /// (web content plus AppKit views such as the editor and find bar), since
+    /// WKWebView snapshots only contain web content.
+    private func capture(_ webView: WKWebView, in container: NSView, overlays: [NSView]) {
         let config = WKSnapshotConfiguration()
         config.rect = webView.bounds
-        webView.takeSnapshot(with: config) { [self] image, error in
-            guard let image else { fail("snapshot failed: \(error?.localizedDescription ?? "no image")") }
-            for overlay in overlays where !overlay.isHidden {
-                guard let rep = overlay.bitmapImageRepForCachingDisplay(in: overlay.bounds) else { continue }
-                overlay.cacheDisplay(in: overlay.bounds, to: rep)
-                let frame = webView.convert(overlay.frame, from: overlay.superview)
+        webView.takeSnapshot(with: config) { [self] webImage, error in
+            guard let webImage else { fail("snapshot failed: \(error?.localizedDescription ?? "no image")") }
+            var image = webImage
+            if !overlays.isEmpty {
+                image = NSImage(size: container.bounds.size)
                 image.lockFocus()
-                NSImage(cgImage: rep.cgImage!, size: overlay.bounds.size).draw(in: frame)
+                webImage.draw(in: container.convert(webView.bounds, from: webView))
+                for overlay in overlays where !overlay.isHidden {
+                    guard let rep = overlay.bitmapImageRepForCachingDisplay(in: overlay.bounds) else { continue }
+                    overlay.cacheDisplay(in: overlay.bounds, to: rep)
+                    NSImage(cgImage: rep.cgImage!, size: overlay.bounds.size)
+                        .draw(in: container.convert(overlay.bounds, from: overlay))
+                }
                 image.unlockFocus()
             }
             guard let tiff = image.tiffRepresentation,

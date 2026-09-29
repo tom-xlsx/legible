@@ -141,6 +141,14 @@
     }
   }
 
+  /** Scrolls without reporting the movement to Swift as a user scroll. */
+  let suppressScrollReports = false;
+  function programmaticScroll(fn) {
+    suppressScrollReports = true;
+    fn();
+    requestAnimationFrame(() => requestAnimationFrame(() => { suppressScrollReports = false; }));
+  }
+
   function scrollAnchor() {
     for (const el of root.querySelectorAll('[data-line]')) {
       const r = el.getBoundingClientRect();
@@ -157,7 +165,7 @@
     }
     if (!best) return;
     const top = best.getBoundingClientRect().top;
-    window.scrollTo({ top: window.scrollY + top - anchor.offset, behavior: 'instant' });
+    programmaticScroll(() => window.scrollTo({ top: window.scrollY + top - anchor.offset, behavior: 'instant' }));
   }
 
   function whenImagesSettled() {
@@ -322,6 +330,68 @@
   }, { passive: true });
   window.addEventListener('resize', updateFocus);
 
+  // ---- Scroll sync with the editor -----------------------------------------
+  // Block elements carry data-line (their first source line). Positions
+  // between two stamped blocks are interpolated.
+
+  function lineElements() {
+    // Footnote definitions render at the end regardless of where they were
+    // written, so they are left out; everything else is in source order.
+    return [...root.querySelectorAll('[data-line]')]
+      .filter((el) => !el.closest('.footnotes'))
+      .map((el) => ({ el, line: Number(el.dataset.line), top: el.getBoundingClientRect().top + window.scrollY }))
+      .filter((e) => Number.isFinite(e.line))
+      .sort((a, b) => a.top - b.top || a.line - b.line);
+  }
+
+  /** Fractional source line at the top of the viewport. */
+  function topLine() {
+    const items = lineElements();
+    if (!items.length) return 0;
+    const y = window.scrollY;
+    let prev = null;
+    for (const item of items) {
+      if (item.top > y) {
+        if (!prev) return Math.max(0, item.line - 1);
+        const span = item.top - prev.top;
+        const ratio = span > 0 ? (y - prev.top) / span : 0;
+        return prev.line + ratio * (item.line - prev.line);
+      }
+      prev = item;
+    }
+    const last = items[items.length - 1];
+    const tail = Math.max(1, last.el.getBoundingClientRect().height);
+    return last.line + Math.min(1, (y - last.top) / tail);
+  }
+
+  function scrollToLine(line) {
+    const items = lineElements();
+    if (!items.length) return;
+    let y;
+    let prev = null;
+    for (const item of items) {
+      if (item.line > line) {
+        if (!prev) { y = 0; break; }
+        const ratio = item.line > prev.line ? (line - prev.line) / (item.line - prev.line) : 0;
+        y = prev.top + ratio * (item.top - prev.top);
+        break;
+      }
+      prev = item;
+    }
+    if (y === undefined) {
+      const last = items[items.length - 1];
+      y = last.top + (line - last.line) * last.el.getBoundingClientRect().height;
+    }
+    programmaticScroll(() => window.scrollTo({ top: Math.max(0, y - 16), behavior: 'instant' }));
+  }
+
+  let scrollFrame = 0;
+  window.addEventListener('scroll', () => {
+    if (suppressScrollReports) return;
+    cancelAnimationFrame(scrollFrame);
+    scrollFrame = requestAnimationFrame(() => post({ type: 'scroll', line: topLine() }));
+  }, { passive: true });
+
   // ---- Public API (called from Swift) ------------------------------------
 
   const Legible = {
@@ -342,7 +412,7 @@
       addCopyButtons();
 
       if (anchor) restoreScroll(anchor);
-      else if (!preserveScroll) window.scrollTo({ top: 0, behavior: 'instant' });
+      else if (!preserveScroll) programmaticScroll(() => window.scrollTo({ top: 0, behavior: 'instant' }));
       updateFocus();
 
       whenImagesSettled().then(() => {
@@ -369,6 +439,8 @@
 
     findStatus,
     selfTest,
+    scrollToLine,
+    topLine,
   };
 
   window.Legible = Legible;
