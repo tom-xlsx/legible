@@ -6,7 +6,7 @@ FIXTURE  := fixtures/kitchen-sink.md
 # Checks and snapshots run against a throwaway settings file, never yours.
 export LEGIBLE_SETTINGS := $(CURDIR)/build/check-settings.toml
 
-.PHONY: all build app app-debug icon install check test snapshots release clean
+.PHONY: all build app app-debug icon install check test snapshots release dist clean
 
 all: app
 
@@ -61,6 +61,15 @@ snapshots: app
 	done
 	swift scripts/contact-sheet.swift build/snapshots/all.png --columns 4 --width 420 build/snapshots/*.png
 	@echo "Snapshots in build/snapshots/ (all.png is the contact sheet)"
+
+## Zip the built app for sharing, with the version in the name and a note on opening it.
+dist: app
+	@mkdir -p build/dist
+	@eval "$$(scripts/version.sh)"; \
+	  zip="build/dist/Legible-$$VERSION.zip"; rm -f "$$zip"; \
+	  ditto -c -k --keepParent "$(APP)" "$$zip"; \
+	  sed "s/@VERSION@/$$DESCRIPTION/" scripts/dist-readme.txt > "build/dist/Read me first.txt"; \
+	  echo "Wrote $$zip and build/dist/Read me first.txt"
 
 ## Tag a release (annotated; opens your editor for the notes), then build and install.
 release:
