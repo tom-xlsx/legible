@@ -337,19 +337,26 @@
       }
       for (const d of this.droppings) placeSpeck(d);
       this.updateMark();
+      this.checkOffScreen();
     },
 
-    relocateIfReadingSteadily() {
-      if (this.state !== 'perched' && this.state !== 'dozing') return;
-      if (isShortDocument()) return;
-      if (this.perchPoint && this.mothInView()) return;
-      const needed = this.relocateAfter || (this.relocateAfter = clock.seconds(this.rng.between(60, 120)));
-      if (cadence.steadyFor() < needed) return;
-      this.relocateAfter = null;
-      cadence.reset();
+    /** Off-screen for 10 seconds straight: come back to wherever the reading is. */
+    checkOffScreen() {
+      const settled = this.state === 'perched' || this.state === 'dozing';
+      if (settled && !this.mothInView()) {
+        if (!this.timers.relocate) this.schedule('relocate', clock.seconds(10), () => this.relocate());
+      } else {
+        clock.cancel(this.timers.relocate);
+        delete this.timers.relocate;
+      }
+    },
+
+    relocate() {
+      const settled = this.state === 'perched' || this.state === 'dozing';
+      if (!settled || this.mothInView()) return;
       const y = window.scrollY + window.innerHeight * 0.4;
       const perch = choosePerch(this.adapter, y, this.rng, { avoid: this.perch });
-      if (!perch) return;
+      if (!perch) { this.schedule('relocate', clock.seconds(5), () => this.relocate()); return; }
       this.adapter.moveTo(nearestEdgePoint(perch));
       this.note('relocate');
       this.settle(perch);
@@ -409,6 +416,7 @@
             if (this.state === 'perched') this.adapter.setPose(this.atEnd ? 'close-book' : 'perch-reading');
           }
           this.updateMark();
+          this.checkOffScreen();
           break;
         }
         case 'copy': this.reactWith('nod', 900); break;
@@ -486,7 +494,7 @@
         }
       }
       if (this.state === 'perched' && !reduceMotion() && this.rng.next() < 0.15) this.adapter.blink();
-      this.relocateIfReadingSteadily();
+      this.checkOffScreen();
     },
 
     // -- evidence
@@ -575,7 +583,7 @@
         const perch = choosePerch(M.adapter, window.scrollY + window.innerHeight * 0.4, M.rng);
         if (perch) M.settle(perch, { immediate: true });
       },
-      relocate() { M.relocateAfter = 0; cadence.steadySince = performance.now() - 1e9; M.relocateIfReadingSteadily(); },
+      relocate() { M.relocate(); },
       droppings() { M.leaveDroppings(); },
       nibble() { M.nibbleShown = false; M.showNibble(); },
       doze() { M.lastActivity = -1e12; M.tick(); },
