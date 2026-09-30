@@ -1,13 +1,16 @@
 Legible @VERSION@
 A Markdown reader for macOS. Apple Silicon, macOS 14 or later.
 
-Opening it the first time
-  This copy is not notarised with Apple, so macOS will refuse it once.
-  Either:
-    1. Double-click Legible.app, dismiss the warning, then open
+Opening it for the first time
+  This copy is not notarised by Apple, so macOS will refuse to open it
+  the first time. Do one of the following:
+
+  Either: double-click Legible.app and dismiss the warning, then open
        System Settings > Privacy & Security, scroll down, and click
-       "Open Anyway" next to Legible. Confirm, and it opens normally after that.
-  Or, in Terminal, remove the quarantine flag and open it:
+       "Open Anyway" next to Legible. Confirm, and it will open normally
+       from then on.
+
+  Or: in Terminal, remove the quarantine flag and open it:
        xattr -dr com.apple.quarantine ~/Downloads/Legible.app
        open ~/Downloads/Legible.app
 

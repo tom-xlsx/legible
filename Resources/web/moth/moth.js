@@ -635,8 +635,6 @@
   };
 
   // ---- helpers -------------------------------------------------------------------------------
-  function isShortDocument() { return document.documentElement.scrollHeight <= window.innerHeight * 2.2; }
-
   function nearestEdgePoint(target) {
     const vx = target.x - window.scrollX, vy = target.y - window.scrollY;
     const dLeft = vx, dRight = window.innerWidth - vx, dTop = vy, dBottom = window.innerHeight - vy;

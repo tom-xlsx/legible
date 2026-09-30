@@ -23,6 +23,8 @@ Other targets:
 | `make app` | Build `build/Legible.app` without installing |
 | `make check` | Build, run unit tests, check every theme's contrast, render the kitchen-sink fixture |
 | `make snapshots` | Render `fixtures/kitchen-sink.md` in every theme to `build/snapshots/` |
+| `make dist` | Zip the built app to `build/dist/` with a read-me on opening an unnotarised app |
+| `make app-debug` | Debug build at `build/debug/Legible.app` |
 | `make release VERSION=x.y.z` | Tag a release (annotated, opens your editor for notes), then build and install |
 
 Versions come from git tags only: the build derives `CFBundleShortVersionString` from `git describe` and `CFBundleVersion` from the commit count. `legible --version` prints e.g. `0.3.0 (142, a1b2c3d)`, with `-dirty` when built from uncommitted changes.
