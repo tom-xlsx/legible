@@ -431,7 +431,7 @@
   // ---- Public API (called from Swift) ------------------------------------
 
   const Legible = {
-    render({ markdown, docBase, preserveScroll }) {
+    render({ markdown, docBase, preserveScroll, showEmptyState = true }) {
       const anchor = preserveScroll ? scrollAnchor() : null;
       rawCode.length = 0;
 
@@ -443,7 +443,7 @@
       }
 
       root.innerHTML = window.DOMPurify.sanitize(html, PURIFY_OPTIONS);
-      if (!root.textContent.trim() && !root.querySelector('img')) {
+      if (showEmptyState && !root.textContent.trim() && !root.querySelector('img')) {
         const empty = document.createElement('p');
         empty.className = 'empty-state';
         empty.textContent = state.emptyStates[Math.floor(Math.random() * state.emptyStates.length)];

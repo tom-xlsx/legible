@@ -28,6 +28,16 @@ final class DocumentRegistry {
         entries[token] = nil
     }
 
+    /// Points an existing token at a (new) directory, e.g. after an untitled document is saved.
+    func update(_ token: String, directory: URL?) {
+        guard let directory else { entries[token] = nil; return }
+        let resolvedDirectory = directory.standardizedFileURL.resolvingSymlinksInPath()
+        let root = Self.projectRoot(for: resolvedDirectory)
+        var relative = String(resolvedDirectory.path.dropFirst(root.path.count))
+        if relative.hasPrefix("/") { relative.removeFirst() }
+        entries[token] = Entry(root: root, relativeDirectory: relative)
+    }
+
     /// The base URL relative links in the document resolve against, e.g. legible-doc://<token>/docs/
     func base(for token: String) -> String? {
         guard let entry = entries[token] else { return nil }

@@ -24,6 +24,8 @@ enum MainMenu {
 
         // File
         let file = NSMenu(title: "File")
+        file.item("New", #selector(NSDocumentController.newDocument(_:)), "n")
+        file.item("New from Clipboard", #selector(AppDelegate.newFromClipboard(_:)), "n", mods: [.command, .shift])
         file.item("Open…", #selector(NSDocumentController.openDocument(_:)), "o")
         // AppKit inserts "Open Recent" after any openDocument: item automatically.
         file.addItem(.separator())

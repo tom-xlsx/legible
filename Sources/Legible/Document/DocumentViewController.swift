@@ -148,7 +148,19 @@ final class DocumentViewController: NSViewController {
         findBar.onClose = { [weak self] in self?.hideFind() }
 
         if SettingsStore.shared.settings.tocSidebar { showTOC() }
+        if document.isUntitled && document.opensWithEditor { showEditor() }   // a new document is for writing: the one time the editor opens by itself
         render(preserveScroll: false)
+    }
+
+    override func viewDidAppear() {
+        super.viewDidAppear()
+        if document.isUntitled, document.opensWithEditor, isEditorVisible { view.window?.makeFirstResponder(editor.textView) }
+    }
+
+    /// The document was saved somewhere new (or for the first time): relative links now resolve there.
+    func documentLocationDidChange() {
+        DocumentRegistry.shared.update(token, directory: document.directoryURL)
+        render(preserveScroll: true)
     }
 
     func applyTheme() {
@@ -206,7 +218,8 @@ final class DocumentViewController: NSViewController {
     func render(preserveScroll: Bool) {
         preview.render(markdown: document.text,
                        docBase: DocumentRegistry.shared.base(for: token),
-                       preserveScroll: preserveScroll)
+                       preserveScroll: preserveScroll,
+                       showEmptyState: !isEditorVisible)
     }
 
     /// Called by the document when its text was replaced from disk.
@@ -253,6 +266,7 @@ final class DocumentViewController: NSViewController {
         view.window?.makeFirstResponder(editor.textView)
         view.window?.toolbar?.validateVisibleItems()
         preview.mothEvent("editor-open")
+        if document.text.isEmpty { render(preserveScroll: true) }
     }
 
     func hideEditor() {
@@ -262,6 +276,7 @@ final class DocumentViewController: NSViewController {
         view.window?.makeFirstResponder(preview.webView)
         view.window?.toolbar?.validateVisibleItems()
         preview.mothEvent("editor-close")
+        if document.text.isEmpty { render(preserveScroll: true) }
     }
 
     func toggleTOC() {

@@ -61,7 +61,9 @@ A theme is a header comment plus a `:root` block:
 
 ## Editing
 
-Files open in reading mode. ⌘E (or the toolbar button) opens an editor pane beside the preview: plain monospace text, live preview as you type, and scroll positions kept in step both ways. ⌘S saves; closing the pane returns to reading mode. The editor never opens on its own.
+Files open in reading mode. ⌘E (or the toolbar button) opens an editor pane beside the preview: plain monospace text, live preview as you type, and scroll positions kept in step both ways. ⌘S saves; closing the pane returns to reading mode. The editor never opens on its own for an existing file.
+
+⌘N starts a new, untitled document with the editor open and focused. ⌘⇧N does the same with whatever Markdown is on the clipboard, opening it for reading. ⌘S asks where to save; from then on it behaves like any other file (relative images resolve next to it, live reload watches it).
 
 ## Settings
 

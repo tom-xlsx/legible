@@ -16,6 +16,7 @@ struct LaunchOptions {
     var showEditor = false
     var showTOC = false
     var save = false
+    var saveAs: String?
     var printDocuments = false
     var settingsPane: String?
     var aboutBox = false
@@ -56,6 +57,7 @@ struct LaunchOptions {
             case "zoom": zoom = Double(value)
             case "delay": delay = Double(value) ?? delay
             case "edit": editText = value
+            case "save-as": saveAs = value
             case "settings-pane": settingsPane = value
             case "moth-sheet": mothSheet = value
             case "moth-validate": mothValidate = value
@@ -74,7 +76,8 @@ struct LaunchOptions {
 }
 
 /// `Legible --snapshot=in.md --out=out.png [--theme=id] [--size=WxH] [--scroll=Y|selector]
-///          [--zoom=1.3] [--eval=JS] [--find=query] [--window] [--delay=seconds] [--editor] [--edit=text] [--save] [--toc] [--moth-state=pose] [--seed=N]`
+///          [--zoom=1.3] [--eval=JS] [--find=query] [--window] [--delay=seconds] [--editor] [--edit=text] [--save] [--toc] [--moth-state=pose] [--seed=N] [--save-as=path]`
+/// `--snapshot=new` starts from an untitled document instead of a file; `--snapshot=clipboard` from the pasteboard text.
 /// --editor opens the editor pane; --edit appends text to it (and implies --editor).
 /// Renders a document, writes a PNG of the viewport (or the whole window with
 /// --window, which includes AppKit overlays such as the find bar), and exits
@@ -107,12 +110,28 @@ final class SnapshotJob {
             self?.fail("timed out waiting for the document to render")
         }
 
-        NSDocumentController.shared.openDocument(withContentsOf: input, display: true) { [self] document, _, error in
+        let opened: (NSDocument?, Error?) -> Void = { [self] document, error in
             guard let document = document as? MarkdownDocument,
                   let controller = document.viewController,
                   let window = controller.view.window as? DocumentWindow else {
                 fail("cannot open \(input.path): \(error?.localizedDescription ?? "unknown error")")
             }
+            self.drive(document: document, controller: controller, window: window)
+        }
+        if input.lastPathComponent == "new" {
+            // `--snapshot=new`: an untitled document, as ⌘N makes it.
+            do { opened(try NSDocumentController.shared.openUntitledDocumentAndDisplay(true), nil) } catch { opened(nil, error) }
+        } else if input.lastPathComponent == "clipboard" {
+            // `--snapshot=clipboard`: as File › New from Clipboard makes it.
+            let text = NSPasteboard.general.string(forType: .string) ?? ""
+            do { opened(try MarkdownDocument.makeUntitled(text: text, opensWithEditor: false), nil) } catch { opened(nil, error) }
+        } else {
+            NSDocumentController.shared.openDocument(withContentsOf: input, display: true) { document, _, error in opened(document, error) }
+        }
+    }
+
+    private func drive(document: MarkdownDocument, controller: DocumentViewController, window: DocumentWindow) {
+        do {
             if let size = options.size {
                 window.allowsOversize = true
                 window.setContentSize(NSSize(width: size.width, height: size.height))
@@ -129,6 +148,13 @@ final class SnapshotJob {
                 if let text = options.editText {
                     controller.editor.textView.setSelectedRange(NSRange(location: (controller.editor.text as NSString).length, length: 0))
                     controller.editor.textView.insertText(text, replacementRange: controller.editor.textView.selectedRange())
+                }
+                if let path = options.saveAs {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        document.save(to: URL(fileURLWithPath: path), ofType: "net.daringfireball.markdown", for: .saveAsOperation) { error in
+                            print("save as: \(error.map { "failed: \($0.localizedDescription)" } ?? "ok"); fileURL=\(document.fileURL?.lastPathComponent ?? "nil"); title=\(window.title)")
+                        }
+                    }
                 }
                 if options.save {
                     // Let the text view close its undo group first, as happens between keystrokes.

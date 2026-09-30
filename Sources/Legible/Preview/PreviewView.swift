@@ -61,11 +61,12 @@ final class PreviewView: NSView {
 
     // MARK: Swift → JS
 
-    func render(markdown: String, docBase: String?, preserveScroll: Bool) {
+    func render(markdown: String, docBase: String?, preserveScroll: Bool, showEmptyState: Bool = true) {
         let payload: [String: Any] = [
             "markdown": markdown,
             "docBase": docBase ?? "",
             "preserveScroll": preserveScroll,
+            "showEmptyState": showEmptyState,
         ]
         call("Legible.render(\(jsLiteral(payload)))")
     }

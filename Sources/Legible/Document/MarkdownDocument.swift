@@ -6,7 +6,29 @@ final class MarkdownDocument: NSDocument {
     private var watcher: FileWatcher?
 
     override var fileURL: URL? {
-        didSet { watchFile() }
+        didSet {
+            watchFile()
+            if fileURL != oldValue { viewController?.documentLocationDidChange() }
+        }
+    }
+
+    var isUntitled: Bool { fileURL == nil }
+    /// New documents open with the editor; ones made from the clipboard open for reading.
+    var opensWithEditor = true
+
+    /// An untitled document holding the given text (File › New from Clipboard).
+    static func makeUntitled(text: String, opensWithEditor: Bool) throws -> MarkdownDocument {
+        let controller = NSDocumentController.shared
+        guard let document = try controller.makeUntitledDocument(ofType: "net.daringfireball.markdown") as? MarkdownDocument else {
+            throw CocoaError(.featureUnsupported)
+        }
+        document.text = text
+        document.opensWithEditor = opensWithEditor
+        controller.addDocument(document)
+        document.makeWindowControllers()
+        document.showWindows()
+        if !text.isEmpty { document.updateChangeCount(.changeDone) }
+        return document
     }
 
     override class var autosavesInPlace: Bool { false }

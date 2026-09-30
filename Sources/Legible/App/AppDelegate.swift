@@ -11,12 +11,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var restoredSession = false
 
     func applicationWillFinishLaunching(_ notification: Notification) {
+        if launchOptions.isHeadless {
+            NSApp.setActivationPolicy(.accessory)   // snapshots and self-tests must not steal focus from whatever is being typed
+        }
         NSWindow.allowsAutomaticWindowTabbing = false
         ThemeManager.shared.start()
         SettingsStore.shared.start()
         SettingsApplier.shared.start()
         NSApp.mainMenu = MainMenu.build()
         DockIconController.shared.start()
+    }
+
+    @objc func newFromClipboard(_ sender: Any?) {
+        guard let text = NSPasteboard.general.string(forType: .string) else { return }
+        do { _ = try MarkdownDocument.makeUntitled(text: text, opensWithEditor: false) } catch { NSApp.presentError(error) }
     }
 
     @objc func showSettings(_ sender: Any?) {
@@ -96,5 +104,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             .version: "",
             .credits: Garnish.aboutCredits(),
         ])
+    }
+}
+
+extension AppDelegate: NSMenuItemValidation {
+    func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
+        if menuItem.action == #selector(newFromClipboard(_:)) {
+            return NSPasteboard.general.string(forType: .string)?.isEmpty == false
+        }
+        return true
     }
 }
