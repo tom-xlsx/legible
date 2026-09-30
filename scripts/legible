@@ -2,10 +2,13 @@
 # legible — open Markdown files in Legible from the terminal.
 #
 #   legible README.md [more.md ...]   open files
+#   legible https://…/README.md       open a Markdown file from a URL
 #   legible -                         read Markdown from stdin
 #   legible --version                 print the installed app's version
 #   legible --help
 #
+# URLs are downloaded to a temporary file, so relative links and images in
+# them won't resolve. GitHub "blob" page links are fetched as raw files.
 # Set LEGIBLE_APP to point at a different Legible.app.
 set -euo pipefail
 
@@ -18,20 +21,55 @@ case "${1:-}" in
     /usr/libexec/PlistBuddy -c 'Print :LegibleVersionDescription' "$APP/Contents/Info.plist"
     exit 0 ;;
   --help|-h)
-    sed -n '2,10p' "$0" | sed 's/^# \{0,1\}//'
+    sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//'
     exit 0 ;;
 esac
 
+# A fresh temp folder per invocation, so downloaded files keep a readable name.
+tmpdir=""
+temp_file() {  # temp_file NAME -> path
+  [ -n "$tmpdir" ] || tmpdir="$(mktemp -d -t legible)"
+  echo "$tmpdir/$1"
+}
+
+# Turn a GitHub file page into its raw counterpart; other URLs pass through.
+raw_url() {
+  case "$1" in
+    https://github.com/*/blob/*)
+      echo "$1" | sed -E 's#^https://github\.com/([^/]+)/([^/]+)/blob/#https://raw.githubusercontent.com/\1/\2/#' ;;
+    *) echo "$1" ;;
+  esac
+}
+
+# A file name for a URL: its last path segment, with a Markdown extension.
+name_for_url() {
+  local name="${1%%[?#]*}"; name="${name%/}"; name="${name##*/}"
+  name="$(printf '%s' "$name" | sed 's/%20/ /g')"
+  [ -n "$name" ] || name="index"
+  case "$name" in
+    *.md|*.markdown|*.mdown|*.txt) ;;
+    *) name="$name.md" ;;
+  esac
+  echo "$name"
+}
+
 files=()
 for arg in "$@"; do
-  if [ "$arg" = "-" ]; then
-    tmp="$(mktemp -t legible-stdin).md"
-    cat > "$tmp"
-    files+=("$tmp")
-  else
-    [ -e "$arg" ] || { echo "legible: no such file: $arg" >&2; exit 1; }
-    files+=("$arg")
-  fi
+  case "$arg" in
+    -)
+      tmp="$(temp_file stdin.md)"
+      cat > "$tmp"
+      files+=("$tmp") ;;
+    http://*|https://*)
+      tmp="$(temp_file "$(name_for_url "$arg")")"
+      url="$(raw_url "$arg")"
+      curl -fsSL --max-time 30 --proto '=http,https' -o "$tmp" "$url" \
+        || { echo "legible: could not download $url" >&2; exit 1; }
+      files+=("$tmp") ;;
+    *)
+      [ -e "$arg" ] || { echo "legible: no such file: $arg" >&2; exit 1; }
+      files+=("$arg") ;;
+  esac
 done
 
 if [ "${#files[@]}" -eq 0 ]; then

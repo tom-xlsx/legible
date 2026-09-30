@@ -34,9 +34,12 @@ Versions come from git tags only: the build derives `CFBundleShortVersionString`
 ```bash
 legible README.md          # open a file
 legible a.md b.md          # open several
+legible https://…/NOTES.md # open a file from a URL
 cat notes.md | legible -   # read from stdin
 legible --version
 ```
+
+A URL is downloaded to a temporary file, so relative links and images inside it won't resolve. A GitHub file page (`github.com/…/blob/…`) is fetched as the raw file, so you can paste the link straight from the browser.
 
 For the Yazi file manager, add an opener rule that runs `legible "$@"` for `*.md`.
 
