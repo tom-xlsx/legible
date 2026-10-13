@@ -7,7 +7,7 @@
 	<key>CFBundleDisplayName</key>
 	<string>Legible</string>
 	<key>CFBundleIdentifier</key>
-	<string>io.github.earthling606.Legible</string>
+	<string>io.github.tom-xlsx.Legible</string>
 	<key>CFBundleExecutable</key>
 	<string>Legible</string>
 	<key>CFBundlePackageType</key>
