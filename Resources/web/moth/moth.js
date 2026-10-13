@@ -606,7 +606,8 @@
         // and the text geometry must actually cover the document.
         const para = root.querySelector('p');
         const pr = para ? pageRect(para) : null;
-        const w = M.adapter.element.offsetWidth, h = M.adapter.element.offsetHeight;
+        // The moth may not have arrived yet, so fall back to its nominal size as candidatePerches does.
+        const w = M.adapter.element.offsetWidth || M.adapter.size, h = M.adapter.element.offsetHeight || M.adapter.size;
         const onText = pr ? { rect: { left: pr.left + 4, top: pr.top, right: pr.left + 4 + w, bottom: pr.top + h } } : null;
         const detectorRejectsText = onText ? !perchIsClear(onText) : false;
         return { candidates: all.length, clear: clear.length, offenders: offenders.map((c) => c.perch), textRects: rects.length, detectorRejectsText };

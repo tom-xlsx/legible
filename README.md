@@ -25,6 +25,7 @@ Other targets:
 | `make snapshots` | Render `fixtures/kitchen-sink.md` in every theme to `build/snapshots/` |
 | `make dist` | Zip the built app to `build/dist/` with a read-me on opening an unnotarised app |
 | `make app-debug` | Debug build at `build/debug/Legible.app` |
+| `make ql-shot FILE=x.md` | Screenshot the installed Quick Look preview of a file to `build/ql-shot.png` |
 | `make release VERSION=x.y.z` | Tag a release (annotated, opens your editor for notes), then build and install |
 
 Versions come from git tags only: the build derives `CFBundleShortVersionString` from `git describe` and `CFBundleVersion` from the commit count. `legible --version` prints e.g. `0.3.0 (142, a1b2c3d)`, with `-dirty` when built from uncommitted changes.
@@ -42,6 +43,18 @@ legible --version
 A URL is downloaded to a temporary file, so relative links and images inside it won't resolve. A GitHub file page (`github.com/…/blob/…`) is fetched as the raw file, so you can paste the link straight from the browser.
 
 For the Yazi file manager, add an opener rule that runs `legible "$@"` for `*.md`.
+
+## Quick Look
+
+Legible includes a Quick Look extension, so selecting a Markdown file in Finder and pressing Space shows it rendered. `make install` registers it; if nothing changes, open Legible once and try again. Previews use the default light and dark themes and follow the system appearance. They leave raw HTML out (it appears as text) and can't load images stored beside the file, because Quick Look only lets the extension read the file itself.
+
+If another Markdown previewer is installed, macOS may keep using it. To step it aside:
+
+```bash
+pluginkit -e ignore -i <its bundle identifier>
+```
+
+`pluginkit -m -p com.apple.quicklook.preview -v` lists the candidates; `pluginkit -e default -i <id>` restores one.
 
 ## Themes
 

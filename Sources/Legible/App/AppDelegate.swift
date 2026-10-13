@@ -7,6 +7,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var settingsSnapshotJob: SettingsSnapshotJob?
     private var garnishSnapshotJob: GarnishSnapshotJob?
     private var mothSheetJob: MothSheetJob?
+    private var quickLookJob: QuickLookSnapshotJob?
     private var mothSelfTestJob: MothSelfTestJob?
     private var restoredSession = false
 
@@ -48,6 +49,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             job.run()
         } else if let job = SettingsSnapshotJob(options: launchOptions) {
             settingsSnapshotJob = job
+            job.run()
+        } else if let job = QuickLookSnapshotJob(options: launchOptions) {
+            quickLookJob = job
             job.run()
         } else if let job = GarnishSnapshotJob(options: launchOptions) {
             garnishSnapshotJob = job

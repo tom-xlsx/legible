@@ -12,52 +12,12 @@
   const root = document.getElementById('doc');
   const themeStyle = document.getElementById('theme');
   const overrideStyle = document.getElementById('overrides');
-  const escapeHtml = window.markdownit().utils.escapeHtml;
-
   /** Raw source of every code block in the current render, for copy buttons. */
-  const rawCode = [];
+  let rawCode = [];
 
-  // ---- markdown-it -----------------------------------------------------
+  // ---- markdown-it (see legible-core.js) --------------------------------
 
-  const md = window.markdownit({ html: true, linkify: true, typographer: false, breaks: false })
-    .use(window.markdownitFootnote)
-    .use(window.markdownitTaskLists, { enabled: false, label: true });
-
-  // Stamp block tokens with their source line so scroll position can be
-  // preserved across re-renders and synced with the editor.
-  md.core.ruler.push('source_lines', (state) => {
-    const offset = (state.env && state.env.lineOffset) || 0;
-    for (const t of state.tokens) {
-      if (!t.map || t.nesting < 0 || t.type === 'inline') continue;
-      if (t.type === 'fence' || t.type === 'code_block' || t.type === 'html_block') continue;
-      t.attrSet('data-line', String(t.map[0] + offset));
-    }
-  });
-
-  function renderCode(content, lang, map, env) {
-    const offset = (env && env.lineOffset) || 0;
-    let body;
-    if (lang && window.hljs.getLanguage(lang)) {
-      body = window.hljs.highlight(content, { language: lang, ignoreIllegals: true }).value;
-    } else {
-      body = escapeHtml(content);
-    }
-    const index = rawCode.push(content) - 1;
-    const line = map ? ` data-line="${map[0] + offset}"` : '';
-    const langAttr = lang ? ` data-lang="${escapeHtml(lang)}"` : '';
-    const cls = lang ? ` language-${escapeHtml(lang)}` : '';
-    return `<div class="code-block"${line} data-code="${index}"${langAttr}>` +
-      `<pre><code class="hljs${cls}">${body}</code></pre></div>\n`;
-  }
-
-  md.renderer.rules.fence = (tokens, idx, _opts, env) => {
-    const t = tokens[idx];
-    const info = t.info ? md.utils.unescapeAll(t.info).trim() : '';
-    const lang = info.split(/\s+/)[0] || '';
-    return renderCode(t.content, lang, t.map, env);
-  };
-  md.renderer.rules.code_block = (tokens, idx, _opts, env) =>
-    renderCode(tokens[idx].content, '', tokens[idx].map, env);
+  const core = window.LegibleCore.create({ html: true });
 
   // ---- Sanitising --------------------------------------------------------
   // The safe subset real READMEs use. Anything that can run code, phone home,
@@ -97,23 +57,11 @@
 
   // ---- Helpers -----------------------------------------------------------
 
-  function splitFrontMatter(text) {
-    const m = /^---[ \t]*\r?\n([\s\S]*?)\r?\n---[ \t]*(?:\r?\n|$)/.exec(text);
-    if (!m) return { frontMatter: null, body: text, lineOffset: 0 };
-    return { frontMatter: m[1], body: text.slice(m[0].length), lineOffset: m[0].split('\n').length - 1 };
-  }
-
-  function slugify(text) {
-    return text.trim().toLowerCase()
-      .replace(/[^\p{L}\p{N}\s-]/gu, '')
-      .replace(/\s+/g, '-');
-  }
-
   function assignHeadingIds() {
     const seen = new Map();
     const headings = [];
     for (const h of root.querySelectorAll('h1, h2, h3, h4, h5, h6')) {
-      let id = h.id || slugify(h.textContent) || 'section';
+      let id = h.id || window.LegibleCore.slugify(h.textContent) || 'section';
       const n = seen.get(id) || 0;
       seen.set(id, n + 1);
       if (n > 0) id = `${id}-${n}`;
@@ -433,16 +381,10 @@
   const Legible = {
     render({ markdown, docBase, preserveScroll, showEmptyState = true }) {
       const anchor = preserveScroll ? scrollAnchor() : null;
-      rawCode.length = 0;
+      const rendered = core.render(markdown || '');
+      rawCode = rendered.code;
 
-      const { frontMatter, body, lineOffset } = splitFrontMatter(markdown || '');
-      let html = md.render(body, { lineOffset });
-      if (frontMatter !== null) {
-        html = `<details class="front-matter"><summary>Front matter</summary>` +
-          `<pre>${escapeHtml(frontMatter)}</pre></details>\n` + html;
-      }
-
-      root.innerHTML = window.DOMPurify.sanitize(html, PURIFY_OPTIONS);
+      root.innerHTML = window.DOMPurify.sanitize(rendered.html, PURIFY_OPTIONS);
       if (showEmptyState && !root.textContent.trim() && !root.querySelector('img')) {
         const empty = document.createElement('p');
         empty.className = 'empty-state';

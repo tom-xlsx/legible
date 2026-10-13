@@ -3,10 +3,11 @@ ICNS     := build/Legible.icns
 INSTALL  := $(HOME)/Applications/Legible.app
 BINDIR   := $(HOME)/.local/bin
 FIXTURE  := fixtures/kitchen-sink.md
+LSREGISTER := /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
 # Checks and snapshots run against a throwaway settings file, never yours.
 export LEGIBLE_SETTINGS := $(CURDIR)/build/check-settings.toml
 
-.PHONY: all build app app-debug icon install check test snapshots release dist clean
+.PHONY: all build app app-debug icon install check test snapshots ql-shot release dist clean
 
 all: app
 
@@ -30,10 +31,15 @@ $(ICNS): Resources/icon/legible.svg scripts/make-icon.swift
 
 ## Build, copy to ~/Applications, install the `legible` CLI.
 install: app
+	-pluginkit -r "$(INSTALL)/Contents/PlugIns/LegibleQuickLook.appex" 2>/dev/null
 	rm -rf "$(INSTALL)"
 	cp -R "$(APP)" "$(INSTALL)"
 	mkdir -p "$(BINDIR)"
 	install -m 755 scripts/legible "$(BINDIR)/legible"
+	$(LSREGISTER) -f "$(INSTALL)"
+	pluginkit -a "$(INSTALL)/Contents/PlugIns/LegibleQuickLook.appex"
+	pluginkit -e use -i io.github.tom-xlsx.Legible.QuickLook
+	qlmanage -r >/dev/null 2>&1; qlmanage -r cache >/dev/null 2>&1
 	@echo "Installed $(INSTALL) and $(BINDIR)/legible"
 	@echo "One-time step to make Legible the default for .md files: File › Use Legible for Markdown Files…"
 
@@ -50,6 +56,7 @@ check: app test
 	$(APP)/Contents/MacOS/Legible --moth-selftest=$(FIXTURE)
 	$(APP)/Contents/MacOS/Legible --snapshot=$(FIXTURE) --out=build/check-oat-milk.png --theme=oat-milk
 	$(APP)/Contents/MacOS/Legible --snapshot=$(FIXTURE) --out=build/check-burnt-toast.png --theme=burnt-toast
+	$(APP)/Contents/MacOS/Legible --quicklook=$(FIXTURE) --out=build/check-quicklook.png
 	@echo "check: OK"
 
 ## Snapshot the kitchen sink in every bundled theme to build/snapshots/.
@@ -61,6 +68,11 @@ snapshots: app
 	done
 	swift scripts/contact-sheet.swift build/snapshots/all.png --columns 4 --width 420 build/snapshots/*.png
 	@echo "Snapshots in build/snapshots/ (all.png is the contact sheet)"
+
+## Screenshot the installed Quick Look preview of a file: make ql-shot FILE=notes.md
+ql-shot:
+	@[ -n "$(FILE)" ] || { echo "usage: make ql-shot FILE=path.md"; exit 1; }
+	scripts/ql-shot.sh "$(FILE)" build/ql-shot.png
 
 ## Zip the built app for sharing, with the version in the name and a note on opening it.
 dist: app

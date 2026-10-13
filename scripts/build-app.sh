@@ -34,5 +34,25 @@ cp    "$ROOT/Resources/icon/legible.svg" "$CONTENTS/Resources/legible.svg"
 mkdir -p "$CONTENTS/Resources/bin"
 install -m 755 "$ROOT/scripts/legible" "$CONTENTS/Resources/bin/legible"
 
+# Quick Look preview extension. Signed first, with its sandbox entitlements (required
+# for any plug-in; without them pkd ignores it silently), then the app, never --deep.
+QLBIN="$(swift build -c "$CONFIG" --arch arm64 --show-bin-path)/LegibleQuickLook"
+APPEX="$CONTENTS/PlugIns/LegibleQuickLook.appex"
+mkdir -p "$APPEX/Contents/MacOS" "$APPEX/Contents/Resources"
+cp "$QLBIN" "$APPEX/Contents/MacOS/LegibleQuickLook"
+sed -e "s|@VERSION@|$VERSION|" -e "s|@BUILD@|$BUILD|" \
+    "$ROOT/Resources/QuickLook/Info.plist" > "$APPEX/Contents/Info.plist"
+printf 'XPC!????' > "$APPEX/Contents/PkgInfo"
+# The extension renders with the same core and CSS as the page, from its own copy.
+cp "$ROOT/Resources/web/legible-core.js" "$ROOT/Resources/web/legible.css" "$APPEX/Contents/Resources/"
+cp -R "$ROOT/Resources/web/vendor" "$APPEX/Contents/Resources/vendor"
+mkdir -p "$APPEX/Contents/Resources/themes"
+cp "$ROOT/Resources/themes/oat-milk.css" "$ROOT/Resources/themes/burnt-toast.css" "$APPEX/Contents/Resources/themes/"
+codesign --force --sign - --timestamp=none \
+    --entitlements "$ROOT/Resources/QuickLook/LegibleQuickLook.entitlements" "$APPEX"
+codesign -d --entitlements :- "$APPEX" 2>/dev/null | grep -q app-sandbox \
+    || { echo "build-app: the Quick Look extension lost its sandbox entitlement" >&2; exit 1; }
+
 codesign --force --sign - --timestamp=none "$APP"
+codesign --verify --deep --strict "$APP"
 echo "Built $APP"

@@ -28,10 +28,11 @@ struct LaunchOptions {
     var seed: UInt32?
     var mothSelfTestInput: String?
     var dockIcon = false
+    var quickLookInput: String?
     var editText: String?
     var delay: Double = 0.8
 
-    var isHeadless: Bool { snapshotInput != nil || selfTestInput != nil || settingsPane != nil || aboutBox || dockIcon || mothSheet != nil || mothValidate != nil || mothSelfTestInput != nil }
+    var isHeadless: Bool { snapshotInput != nil || selfTestInput != nil || settingsPane != nil || aboutBox || dockIcon || mothSheet != nil || mothValidate != nil || mothSelfTestInput != nil || quickLookInput != nil }
 
     init(arguments: [String]) {
         for argument in arguments {
@@ -66,6 +67,7 @@ struct LaunchOptions {
             case "moth-state": mothState = value
             case "seed": seed = UInt32(value)
             case "moth-selftest": mothSelfTestInput = value
+            case "quicklook": quickLookInput = value
             case "size":
                 let parts = value.split(separator: "x").compactMap { Int($0) }
                 if parts.count == 2 { size = (parts[0], parts[1]) }
