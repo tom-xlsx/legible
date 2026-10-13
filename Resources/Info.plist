@@ -39,7 +39,7 @@
 	<key>NSSupportsSuddenTermination</key>
 	<false/>
 	<key>NSHumanReadableCopyright</key>
-	<string>Copyright © 2026 earthling606. Licensed under the GPLv3.</string>
+	<string>Copyright © 2026 tom-xlsx. Licensed under the GPLv3.</string>
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
