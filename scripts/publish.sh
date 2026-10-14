@@ -6,14 +6,14 @@
 #   make publish                  # this script
 #
 # LEGIBLE_TAP points at the tap checkout (default: ../homebrew-tap).
-# --dry-run prints every command instead of running it. If an earlier run was
+# --dry-run (or DRY_RUN=1) prints every command instead of running it. If an earlier run was
 # interrupted after the GitHub release was created, running again resumes from
 # the uploaded zip (VERSION=x.y.z if HEAD has since moved past the tag).
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
 DRY=""
-[ "${1:-}" = "--dry-run" ] && DRY="echo + "
+{ [ "${1:-}" = "--dry-run" ] || [ -n "${DRY_RUN:-}" ]; } && DRY="echo + "
 run() { if [ -n "$DRY" ]; then echo "+ $*"; else "$@"; fi; }
 
 TAP="${LEGIBLE_TAP:-$PWD/../homebrew-tap}"
@@ -67,11 +67,14 @@ else
   sed -i '' -e "s/^  version \".*\"/  version \"$V\"/" -e "s/^  sha256 \".*\"/  sha256 \"$SHA\"/" "$CASK"
   grep -q "version \"$V\"" "$CASK" && grep -q "sha256 \"$SHA\"" "$CASK" || { echo "publish: cask edit failed" >&2; exit 1; }
 fi
-brew tap | grep -qx "$TAP_NAME" || run brew tap "$TAP_NAME" "$TAP"
 run brew style "$TAP"
-run brew audit --cask --strict --online "$TAP_NAME/legible"
 if [ -n "$DRY" ] || ! git -C "$TAP" diff --quiet; then run git -C "$TAP" commit -am "legible $V"; fi
 run git -C "$TAP" push origin main
+# Homebrew keeps its own clone of the tap, so the audit runs on what was just pushed.
+brew tap | grep -qx "$TAP_NAME" || run brew tap "$TAP_NAME" "$TAP"
+run git -C "$(brew --repository "$TAP_NAME")" pull -q --ff-only
+run brew audit --cask --strict --online "$TAP_NAME/legible" \
+  || { echo "publish: the cask is pushed but failed the audit above; fix $CASK, commit, push, and re-run the audit" >&2; exit 1; }
 
 echo
 echo "Published Legible $V. Users install it with:"

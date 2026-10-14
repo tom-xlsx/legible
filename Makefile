@@ -101,7 +101,7 @@ release:
 
 ## Publish the tagged release: zip, GitHub release, Homebrew cask bump. See scripts/publish.sh.
 publish:
-	VERSION="$(VERSION)" scripts/publish.sh
+	VERSION="$(VERSION)" DRY_RUN="$(DRY_RUN)" scripts/publish.sh
 
 clean:
 	rm -rf build .build
