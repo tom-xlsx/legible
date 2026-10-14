@@ -101,6 +101,11 @@
   /* --focus-dim: 0.35; */    /* opacity of blocks away from the reading line */
   /* --mark-bg: #fff3a3; */    /* ==highlighted== text; defaults to the selection colours */
   /* --mark-fg: #1f1d1a; */
+  /* --alert-note: #35619b; */ /* GitHub-style alerts; default to --link, --hl-type, --hl-keyword, */
+  /* --alert-tip: #186a72; */  /* --hl-string and --hl-number respectively */
+  /* --alert-important: #5b3fa8; */
+  /* --alert-warning: #7f520c; */
+  /* --alert-caution: #9a4a0a; */
 
   /* Optional: the moth's colours. Legible derives these from the variables above
      (body from --fg-muted, wings from --bg mixed toward --fg-muted, glasses and

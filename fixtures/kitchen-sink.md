@@ -74,7 +74,19 @@ Term definitions using plain paragraphs:
 > > With a second line.
 
 > **Note**
-> A GitHub-style callout rendered as a plain quote.
+> An old-style callout: just a quote with a bold word, left as it is.
+
+> [!NOTE]
+> A GitHub-style alert. The marker line becomes a title and the quote gets its colour.
+
+> [!WARNING]
+> Alerts can hold *formatting*, `code` and several paragraphs.
+>
+> Like this one.
+
+> [!TIP]
+
+> [!NOTE] Not an alert: the marker must be on its own line.
 
 ## Code
 

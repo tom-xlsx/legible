@@ -278,6 +278,10 @@
     const ids = [...root.querySelectorAll('h1, h2, h3, h4, h5, h6')].map((h) => h.id);
     assert(new Set(ids).size === ids.length, `duplicate heading ids: ${ids.join(', ')}`);
     assert(ids.includes('level-three') && ids.includes('level-three-1'), 'heading id de-duplication failed');
+    assert(root.querySelectorAll('.alert').length === 3, `expected 3 alerts, found ${root.querySelectorAll('.alert').length}`);
+    assert(root.querySelector('.alert-warning .alert-title')?.textContent === 'Warning', 'warning alert has no title');
+    assert(!root.querySelector('.alert')?.textContent.includes('[!'), 'alert marker was not removed');
+    assert([...root.querySelectorAll('blockquote')].some((q) => q.textContent.includes('Not an alert')), 'marker mid-line was treated as an alert');
     assert(root.querySelector('details.front-matter'), 'front matter block missing');
     assert(!root.textContent.includes('title: Kitchen Sink') || root.querySelector('.front-matter pre'), 'front matter leaked into the body');
     assert(root.querySelectorAll('.footnotes li').length === 2, 'footnotes missing');

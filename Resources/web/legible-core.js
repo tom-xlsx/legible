@@ -70,6 +70,45 @@
       }
     });
 
+    // GitHub-style alerts: a blockquote whose first line is [!NOTE], [!TIP],
+    // [!IMPORTANT], [!WARNING] or [!CAUTION] becomes <div class="alert alert-note">
+    // with a title line; the marker itself is removed.
+    const ALERT_LABELS = { note: 'Note', tip: 'Tip', important: 'Important', warning: 'Warning', caution: 'Caution' };
+    md.core.ruler.push('github_alerts', (state) => {
+      const tokens = state.tokens;
+      for (let i = 0; i + 2 < tokens.length; i++) {
+        const open = tokens[i];
+        if (open.type !== 'blockquote_open' || tokens[i + 1].type !== 'paragraph_open' || tokens[i + 2].type !== 'inline') continue;
+        const inline = tokens[i + 2];
+        const m = /^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\][ \t]*(?:\n|$)/.exec(inline.content);
+        if (!m) continue;
+        const kind = m[1].toLowerCase();
+        // Strip the marker (and the line break after it) from the inline token.
+        inline.content = inline.content.slice(m[0].length);
+        const children = inline.children || [];
+        if (children.length && children[0].type === 'text') {
+          children[0].content = children[0].content.replace(/^\[![A-Z]+\][ \t]*/, '');
+          if (!children[0].content) children.shift();
+          if (children.length && children[0].type === 'softbreak') children.shift();
+        }
+        // Close tag must change with the open tag.
+        let depth = 0;
+        for (let j = i; j < tokens.length; j++) {
+          if (tokens[j].type === 'blockquote_open') depth++;
+          if (tokens[j].type === 'blockquote_close' && --depth === 0) { tokens[j].tag = 'div'; break; }
+        }
+        open.tag = 'div';
+        open.attrJoin('class', `alert alert-${kind}`);
+        const title = new state.Token('alert_title', 'p', 0);
+        title.content = ALERT_LABELS[kind];
+        title.attrSet('class', 'alert-title');
+        if (!inline.content.trim()) tokens.splice(i + 1, 3, title);   // the marker was the whole paragraph
+        else tokens.splice(i + 1, 0, title);
+      }
+    });
+    md.renderer.rules.alert_title = (tokens, idx) =>
+      `<p class="alert-title">${escapeHtml(tokens[idx].content)}</p>\n`;
+
     function renderCode(content, lang, map, env) {
       const offset = (env && env.lineOffset) || 0;
       let body;

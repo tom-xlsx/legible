@@ -44,6 +44,15 @@ final class MarkdownRendererTests: XCTestCase {
         XCTAssertTrue(html.contains("<details>"), "the app's path keeps raw HTML for DOMPurify to filter")
     }
 
+    func testGitHubAlerts() throws {
+        let renderer = try MarkdownRenderer(web: Self.web, rawHTML: false)
+        let html = try renderer.render("> [!NOTE]\n> Body *here*.\n\n> [!CAUTION]\n\n> [!TIP] inline marker\n\n> plain")
+        XCTAssertTrue(html.contains("<div data-line=\"0\" class=\"alert alert-note\">\n<p class=\"alert-title\">Note</p>\n<p data-line=\"0\">Body <em>here</em>.</p>\n</div>"), html)
+        XCTAssertTrue(html.contains("<div data-line=\"3\" class=\"alert alert-caution\">\n<p class=\"alert-title\">Caution</p>\n</div>"), "marker-only alert keeps just its title")
+        XCTAssertTrue(html.contains("<blockquote data-line=\"5\">\n<p data-line=\"5\">[!TIP] inline marker</p>"), "marker must be alone on its line")
+        XCTAssertEqual(html.components(separatedBy: "<blockquote").count - 1, 2, "plain quotes stay blockquotes")
+    }
+
     func testEmptyAndPlainInput() throws {
         let renderer = try MarkdownRenderer(web: Self.web, rawHTML: false)
         XCTAssertEqual(try renderer.render(""), "")

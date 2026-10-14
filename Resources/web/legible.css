@@ -96,6 +96,20 @@ blockquote {
 blockquote > :last-child { margin-bottom: 0; }
 blockquote blockquote { margin-top: 0.6em; }
 
+/* GitHub-style alerts (> [!NOTE] …). Colours fall back to the syntax palette so every theme has them. */
+.alert {
+  margin: 0 0 1.1em; padding: 0.7em 1em;
+  border-left: 3px solid var(--alert-color); border-radius: 0 4px 4px 0;
+  background: var(--quote-bg);
+}
+.alert > :last-child { margin-bottom: 0; }
+.alert-title { margin: 0 0 0.35em; font-weight: 600; color: var(--alert-color); }
+.alert-note      { --alert-color: var(--alert-note, var(--link)); }
+.alert-tip       { --alert-color: var(--alert-tip, var(--hl-type)); }
+.alert-important { --alert-color: var(--alert-important, var(--hl-keyword)); }
+.alert-warning   { --alert-color: var(--alert-warning, var(--hl-string)); }
+.alert-caution   { --alert-color: var(--alert-caution, var(--hl-number)); }
+
 /* ---- Tables -------------------------------------------------------- */
 
 table {
