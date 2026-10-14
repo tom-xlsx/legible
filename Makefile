@@ -90,13 +90,16 @@ dist: app
 	  sed "s/@VERSION@/$$DESCRIPTION/" scripts/dist-readme.txt > "build/dist/Read me first.txt"; \
 	  echo "Wrote $$zip and build/dist/Read me first.txt"
 
-## Tag a release (annotated; opens your editor for the notes), then build and install.
+## Tag a release with its notes, then build and install:
+##   make release VERSION=x.y.z NOTES="What changed."   (without NOTES, your git editor opens)
 release:
-	@[ -n "$(VERSION)" ] || { echo "usage: make release VERSION=x.y.z"; exit 1; }
+	@[ -n "$(VERSION)" ] || { echo 'usage: make release VERSION=x.y.z NOTES="What changed."'; exit 1; }
 	@echo "$(VERSION)" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$$' || { echo "VERSION must be x.y.z"; exit 1; }
 	@git diff --quiet && git diff --cached --quiet || { echo "refusing: uncommitted changes"; exit 1; }
 	@[ -z "$$(git status --porcelain)" ] || { echo "refusing: untracked files present"; exit 1; }
-	git tag -a "v$(VERSION)"
+	@if [ -n "$(NOTES)" ]; then git tag -a "v$(VERSION)" -m "$(VERSION): $(NOTES)"; \
+	  else git tag -a "v$(VERSION)" || { echo "release: no notes; pass NOTES=\"...\" or set a git editor (git config --global core.editor nano)"; exit 1; }; fi
+	git tag -n9 "v$(VERSION)"
 	$(MAKE) install
 
 ## Publish the tagged release: zip, GitHub release, Homebrew cask bump. See scripts/publish.sh.

@@ -39,7 +39,7 @@ Other targets:
 | `make app-debug` | Debug build at `build/debug/Legible.app` |
 | `make ql-shot FILE=x.md` | Screenshot the installed Quick Look preview of a file to `build/ql-shot.png` |
 | `make uninstall` | Remove what `make install` put in place |
-| `make release VERSION=x.y.z` | Tag a release (annotated, opens your editor for notes), then build and install |
+| `make release VERSION=x.y.z NOTES="…"` | Tag a release with its notes (without `NOTES`, your git editor opens), then build and install |
 | `make publish` | Push the tagged release: zip, GitHub release, Homebrew cask bump in `../homebrew-tap`. Re-run to resume an interrupted one (`VERSION=x.y.z` if HEAD has moved on) |
 
 Versions come from git tags only: the build derives `CFBundleShortVersionString` from `git describe` and `CFBundleVersion` from the commit count. `legible --version` prints e.g. `0.3.0 (142, a1b2c3d)`, with `-dirty` when built from uncommitted changes.
