@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/icon.png" width="128" alt=""></p>
+
 # Legible
 
 A macOS Markdown reader. Opens a `.md` file instantly as a full-window rendered document, with an editor only when you ask for one, and themes that are pleasant to read.
@@ -5,6 +7,10 @@ A macOS Markdown reader. Opens a `.md` file instantly as a full-window rendered 
 Native Swift/AppKit, renders in WKWebView, everything bundled locally (no network at runtime). Apple Silicon, macOS 14 or later.
 
 ![Reading a document in Legible](docs/reading.gif)
+
+Fourteen themes ship with it, light and dark, and your own are a CSS file away:
+
+![Switching themes](docs/themes.gif)
 
 ## Install
 
