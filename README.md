@@ -4,6 +4,8 @@ A macOS Markdown reader. Opens a `.md` file instantly as a full-window rendered 
 
 Native Swift/AppKit, renders in WKWebView, everything bundled locally (no network at runtime). Apple Silicon, macOS 14 or later.
 
+![Reading a document in Legible](docs/reading.gif)
+
 ## Install
 
 With Homebrew, on an Apple Silicon Mac running macOS 14 or later:
