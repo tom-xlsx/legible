@@ -55,7 +55,7 @@ a:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; border-ra
 
 strong { font-weight: 650; }
 del, s { color: var(--fg-muted); }
-mark { background: var(--selection-bg); color: var(--selection-fg); padding: 0 0.15em; border-radius: 2px; }
+mark { background: var(--mark-bg, var(--selection-bg)); color: var(--mark-fg, var(--selection-fg)); padding: 0 0.15em; border-radius: 2px; }
 small { font-size: 0.85em; }
 sub, sup { font-size: 0.75em; line-height: 0; }
 abbr[title] { text-decoration: underline dotted; }
@@ -215,8 +215,14 @@ kbd {
 /* ---- Images, figures, details, front matter, footnotes ------------- */
 
 img { max-width: 100%; height: auto; }
-img[align="left"] { float: left; margin: 0.3em 1em 0.6em 0; }
-img[align="right"] { float: right; margin: 0.3em 0 0.6em 1em; }
+img[align="left"], .image-missing[data-align="left"] { float: left; margin: 0.3em 1em 0.6em 0; }
+img[align="right"], .image-missing[data-align="right"] { float: right; margin: 0.3em 0 0.6em 1em; }
+.image-missing {
+  display: inline-block; max-width: 100%; padding: 0.3em 0.6em;
+  border: 1px dashed var(--rule); border-radius: 4px;
+  color: var(--fg-muted); font-size: 0.9em; font-style: italic;
+}
+.image-missing::before { content: "Image: "; font-style: normal; }
 figure { margin-left: 0; margin-right: 0; }
 figcaption { color: var(--fg-muted); font-size: 0.9em; margin-top: 0.4em; }
 [align="center"] { text-align: center; }

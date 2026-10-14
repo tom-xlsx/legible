@@ -120,10 +120,29 @@
     programmaticScroll(() => window.scrollTo({ top: window.scrollY + top - anchor.offset, behavior: 'instant' }));
   }
 
+  /** A missing or blocked image becomes its alt text, instead of WebKit's "?" box. */
+  function markMissing(img) {
+    const span = document.createElement('span');
+    span.className = 'image-missing';
+    const align = img.getAttribute('align');
+    if (align) span.setAttribute('data-align', align);
+    span.title = img.getAttribute('src') || '';
+    span.textContent = img.getAttribute('alt') || 'Missing image';
+    img.replaceWith(span);
+  }
+
   function whenImagesSettled() {
-    const pending = [...root.querySelectorAll('img')]
-      .filter((img) => !img.complete)
-      .map((img) => new Promise((resolve) => { img.onload = img.onerror = resolve; }));
+    const pending = [];
+    for (const img of root.querySelectorAll('img')) {
+      if (img.complete) {
+        if (img.naturalWidth === 0) markMissing(img);
+        continue;
+      }
+      pending.push(new Promise((resolve) => {
+        img.onload = resolve;
+        img.onerror = () => { markMissing(img); resolve(); };
+      }));
+    }
     return Promise.all(pending);
   }
 

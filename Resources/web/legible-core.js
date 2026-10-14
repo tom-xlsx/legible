@@ -37,7 +37,8 @@
   function create({ html = true } = {}) {
     const md = g.markdownit({ html, linkify: true, typographer: false, breaks: false })
       .use(g.markdownitFootnote)
-      .use(g.markdownitTaskLists, { enabled: false, label: true });
+      .use(g.markdownitTaskLists, { enabled: false, label: true })
+      .use(g.markdownitMark);   // ==highlight== → <mark>
     const escapeHtml = md.utils.escapeHtml;
 
     // Stamp block tokens with their source line so scroll position can be

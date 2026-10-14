@@ -21,6 +21,7 @@ public final class MarkdownRenderer {
         "vendor/markdown-it.min.js",
         "vendor/markdown-it-footnote.min.js",
         "vendor/markdown-it-task-lists.min.js",
+        "vendor/markdown-it-mark.min.js",
         "vendor/highlight.min.js",
         "vendor/languages/dockerfile.min.js",
         "vendor/languages/nginx.min.js",

@@ -14,6 +14,7 @@ PKGS=(
   "markdown-it@14.1.0            dist/markdown-it.min.js"
   "markdown-it-footnote@4.0.0    dist/markdown-it-footnote.min.js"
   "markdown-it-task-lists@2.1.1  dist/markdown-it-task-lists.min.js"
+  "markdown-it-mark@4.0.0        dist/markdown-it-mark.min.js"
   "dompurify@3.2.6               dist/purify.min.js"
   "@highlightjs/cdn-assets@11.11.1 highlight.min.js languages"
 )
