@@ -6,6 +6,13 @@ A macOS Markdown reader. Opens a `.md` file instantly as a full-window rendered 
 
 Native Swift/AppKit, renders in WKWebView, everything bundled locally (no network at runtime). Apple Silicon, macOS 14 or later.
 
+- **Reads first.** Double-click a `.md` file and you're reading it, full window, no toolbar clutter. Press ⌘E when you want to edit, with a live preview that scrolls in step.
+- **Fourteen themes** that were checked for contrast and colour-blind safety, not just picked for looks. Hover the menu to preview one; drop a CSS file in a folder to add your own.
+- **Keeps up with your editor.** Save in Zed, VS Code or vim and the page updates in place, scroll position intact.
+- **Everything GitHub renders**: tables, task lists, footnotes, alerts, syntax-highlighted code with copy buttons, `==highlights==`, and the safe subset of raw HTML READMEs use. Hostile HTML is stripped, not rendered.
+- **Fits the rest of your Mac.** Space in Finder previews with Quick Look. `legible notes.md`, `legible <url>` or a pipe from the terminal. A table of contents, find, zoom, reading time.
+- **Settings in a text file** you can read, with comments, that the app edits in place without rewriting it.
+
 ![Reading a document in Legible](docs/reading.gif)
 
 Fourteen themes ship with it, light and dark, and your own are a CSS file away:
