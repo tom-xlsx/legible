@@ -12,9 +12,15 @@
 # Set LEGIBLE_APP to point at a different Legible.app.
 set -euo pipefail
 
-APP="${LEGIBLE_APP:-$HOME/Applications/Legible.app}"
-[ -d "$APP" ] || APP="/Applications/Legible.app"
-[ -d "$APP" ] || { echo "legible: Legible.app not found (run 'make install' or set LEGIBLE_APP)" >&2; exit 1; }
+# Find the app: LEGIBLE_APP, the bundle this script lives in (Homebrew symlinks the
+# copy inside Legible.app into its bin), then ~/Applications and /Applications.
+self="$(readlink -f "$0" 2>/dev/null || echo "$0")"
+case "$self" in */Contents/Resources/bin/legible) own="${self%/Contents/Resources/bin/legible}" ;; *) own="" ;; esac
+APP=""
+for candidate in "${LEGIBLE_APP:-}" "$own" "$HOME/Applications/Legible.app" "/Applications/Legible.app"; do
+  [ -n "$candidate" ] && [ -d "$candidate" ] && { APP="$candidate"; break; }
+done
+[ -n "$APP" ] || { echo "legible: Legible.app not found (run 'make install' or set LEGIBLE_APP)" >&2; exit 1; }
 
 case "${1:-}" in
   --version|-v)

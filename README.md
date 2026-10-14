@@ -4,7 +4,19 @@ A macOS Markdown reader. Opens a `.md` file instantly as a full-window rendered 
 
 Native Swift/AppKit, renders in WKWebView, everything bundled locally (no network at runtime). Apple Silicon, macOS 14 or later.
 
-## Build and install
+## Install
+
+With Homebrew, on an Apple Silicon Mac running macOS 14 or later:
+
+```bash
+brew install --cask tom-xlsx/tap/legible
+```
+
+Legible is not notarised, so macOS may refuse to open it the first time. Dismiss the dialog, open System Settings › Privacy & Security, scroll down and click “Open Anyway”. Open Legible once so its Quick Look extension is registered. `brew upgrade --cask legible` updates it; `brew uninstall --cask --zap legible` removes it along with its settings.
+
+Without Homebrew, download `Legible-<version>.zip` from the Releases page, unzip, and drag `Legible.app` to Applications; the same first-launch step applies.
+
+## Build from source
 
 Requirements: Xcode (or the Command Line Tools) with Swift 5.9+.
 
@@ -26,7 +38,9 @@ Other targets:
 | `make dist` | Zip the built app to `build/dist/` with a read-me on opening an unnotarised app |
 | `make app-debug` | Debug build at `build/debug/Legible.app` |
 | `make ql-shot FILE=x.md` | Screenshot the installed Quick Look preview of a file to `build/ql-shot.png` |
+| `make uninstall` | Remove what `make install` put in place |
 | `make release VERSION=x.y.z` | Tag a release (annotated, opens your editor for notes), then build and install |
+| `make publish` | Push the tagged release: zip, GitHub release, Homebrew cask bump in `../homebrew-tap` |
 
 Versions come from git tags only: the build derives `CFBundleShortVersionString` from `git describe` and `CFBundleVersion` from the commit count. `legible --version` prints e.g. `0.3.0 (142, a1b2c3d)`, with `-dirty` when built from uncommitted changes.
 

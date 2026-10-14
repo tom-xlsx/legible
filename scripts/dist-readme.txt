@@ -1,6 +1,10 @@
 Legible @VERSION@
 A Markdown reader for macOS. Apple Silicon, macOS 14 or later.
 
+The easy way, if you use Homebrew
+  brew install --cask tom-xlsx/tap/legible
+  (then see "Opening it for the first time" below, which still applies)
+
 Opening it for the first time
   This copy is not notarised by Apple, so macOS will refuse to open it
   the first time. Do one of the following:

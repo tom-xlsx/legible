@@ -7,7 +7,7 @@ LSREGISTER := /System/Library/Frameworks/CoreServices.framework/Frameworks/Launc
 # Checks and snapshots run against a throwaway settings file, never yours.
 export LEGIBLE_SETTINGS := $(CURDIR)/build/check-settings.toml
 
-.PHONY: all build app app-debug icon install check test snapshots ql-shot release dist clean
+.PHONY: all build app app-debug icon install uninstall check test snapshots ql-shot release dist publish clean
 
 all: app
 
@@ -42,6 +42,13 @@ install: app
 	qlmanage -r >/dev/null 2>&1; qlmanage -r cache >/dev/null 2>&1
 	@echo "Installed $(INSTALL) and $(BINDIR)/legible"
 	@echo "One-time step to make Legible the default for .md files: File › Use Legible for Markdown Files…"
+
+## Remove what `make install` put in place (so a Homebrew copy can be tested).
+uninstall:
+	-pluginkit -r "$(INSTALL)/Contents/PlugIns/LegibleQuickLook.appex" 2>/dev/null
+	rm -rf "$(INSTALL)" "$(BINDIR)/legible"
+	qlmanage -r >/dev/null 2>&1; qlmanage -r cache >/dev/null 2>&1
+	@echo "Removed $(INSTALL) and $(BINDIR)/legible"
 
 ## Unit tests.
 test:
@@ -91,6 +98,10 @@ release:
 	@[ -z "$$(git status --porcelain)" ] || { echo "refusing: untracked files present"; exit 1; }
 	git tag -a "v$(VERSION)"
 	$(MAKE) install
+
+## Publish the tagged release: zip, GitHub release, Homebrew cask bump. See scripts/publish.sh.
+publish:
+	scripts/publish.sh
 
 clean:
 	rm -rf build .build
